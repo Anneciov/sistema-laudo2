@@ -89,13 +89,10 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 .b-ok{background:rgba(63,185,80,0.15);color:var(--ok);border:1px solid rgba(63,185,80,0.2)}
 .b-blue{background:rgba(47,129,247,0.15);color:var(--acc);border:1px solid rgba(47,129,247,0.2)}
 .b-nd{background:rgba(72,79,88,0.3);color:var(--txt2);border:1px solid var(--b1)}
-
-/* SLA BADGE DINÂMICO */
 .sla-ok{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)}
 .sla-warn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--warn)}
 .sla-danger{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--err)}
 .sla-closed{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2)}
-
 .pag{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--b1);font-size:11px;color:var(--txt2)}
 .pag-btns{display:flex;gap:6px}
 .pb{padding:4px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;color:var(--txt);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
@@ -186,7 +183,7 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       <div class="tc">
         <div class="tc-head">
           <div class="tc-title">⧖ Pendências <span id="badge-pend" style="font-size:11px;color:var(--txt2)"></span></div>
-          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'pend')">
+          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo, armazém..." oninput="buscar(this.value,'pend')">
         </div>
         <div id="wrap-pend"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
         <div class="pag">
@@ -203,7 +200,7 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       <div class="tc">
         <div class="tc-head">
           <div class="tc-title">☰ Todos os Registros <span id="badge-todos" style="font-size:11px;color:var(--txt2)"></span></div>
-          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'todos')">
+          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo, armazém..." oninput="buscar(this.value,'todos')">
         </div>
         <div id="wrap-todos"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
         <div class="pag">
@@ -240,7 +237,6 @@ var _sb = supabase.createClient(
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}
 
-// ── AUTH ──────────────────────────────────────
 _sb.auth.getSession().then(function(r){
   if(!r.data||!r.data.session){location.href='index.html';return}
   var u=r.data.session.user
@@ -252,16 +248,15 @@ _sb.auth.getSession().then(function(r){
 
 function sair(){_sb.auth.signOut().then(function(){location.href='index.html'})}
 
-// ── CARGA TOTAL COM PAGINAÇÃO ─────────────────
 async function carregar(){
   document.getElementById('totalLabel').textContent='carregando...'
-  var acum=[], pag=0, tam=1000
+  var acum=[], pg=0, tam=1000
   while(true){
-    var res=await _sb.from('tbl_baselaudo').select('*').range(pag*tam,(pag+1)*tam-1).order('Protocolo',{ascending:false})
+    var res=await _sb.from('tbl_baselaudo').select('*').range(pg*tam,(pg+1)*tam-1).order('Protocolo',{ascending:false})
     if(res.error||!res.data||res.data.length===0)break
     acum=acum.concat(res.data)
     if(res.data.length<tam)break
-    pag++
+    pg++
   }
   todos=acum
   document.getElementById('totalLabel').textContent=todos.length.toLocaleString('pt-BR')+' registros'
@@ -290,47 +285,41 @@ function filtrar(){
   metricas();graficos();tabela('pend');tabela('todos')
 }
 
-// ── CÁLCULO SLA ───────────────────────────────
-// Pendente  → Data_Envio_para_Qualidade até HOJE (contínuo)
-// Concluído → Data_Envio_para_Qualidade até Data_Retorno_da_Qualidade (fixo)
+// ── SLA ───────────────────────────────────────
+// Concluído → Data_Retorno_da_Qualidade - Data_Envio_para_Qualidade (fixo, para)
+// Pendente  → Data_Envio_para_Qualidade até hoje (contínuo)
 function calcSLA(r){
-  var envio = parseBR(r.Data_Envio_para_Qualidade)
+  var envio=parseBR(r.Data_Envio_para_Qualidade)
   if(!envio) return null
-
-  var andamento = (r.Andamento||'').trim()
-
+  var andamento=(r.Andamento||'').trim()
   if(andamento==='Concluído'){
-    var retorno = parseBR(r.Data_Retorno_da_Qualidade)
-    if(!retorno) return null
-    return diffDias(envio, retorno)
+    var retorno=parseBR(r.Data_Retorno_da_Qualidade)
+    if(retorno) return diffDias(envio,retorno)   // SLA fixo — para na data de retorno
+    return diffDias(envio,new Date())             // fallback se retorno não preenchido
   }
-
-  // Pendente ou qualquer outro: até hoje
-  return diffDias(envio, new Date())
+  return diffDias(envio,new Date())               // Pendente — cresce até hoje
 }
 
 function parseBR(v){
   if(!v) return null
-  v = v.toString().trim()
-  // Tenta dd/mm/yyyy
-  var m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
-  if(m) return new Date(+m[3], +m[2]-1, +m[1])
-  // Tenta yyyy-mm-dd
-  var m2 = v.match(/^(\d{4})-(\d{2})-(\d{2})/)
-  if(m2) return new Date(+m2[1], +m2[2]-1, +m2[3])
+  v=v.toString().trim()
+  var m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if(m) return new Date(+m[3],+m[2]-1,+m[1])
+  var m2=v.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if(m2) return new Date(+m2[1],+m2[2]-1,+m2[3])
   return null
 }
 
-function diffDias(d1, d2){
-  var ms = d2 - d1
-  return Math.max(0, Math.floor(ms/(1000*60*60*24)))
+function diffDias(d1,d2){
+  return Math.max(0,Math.floor((d2-d1)/(1000*60*60*24)))
 }
 
 function slaHtml(r){
-  var dias = calcSLA(r)
+  var dias=calcSLA(r)
   if(dias===null) return '<span class="sla-closed">—</span>'
-  var andamento = (r.Andamento||'').trim()
+  var andamento=(r.Andamento||'').trim()
   if(andamento==='Concluído'){
+    // SLA encerrado — exibe em cinza com ✓
     return '<span class="sla-closed">'+dias+'d ✓</span>'
   }
   // Pendente — colorir por urgência
@@ -344,7 +333,6 @@ function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
   var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
-  // SLA médio só dos pendentes
   var slas=filtrado
     .filter(function(r){return r.Andamento==='Pendente'})
     .map(function(r){return calcSLA(r)})
@@ -423,7 +411,7 @@ function tabela(tipo){
       '<td class="mono">'+e(r.NF_Origem)+'</td>'+
       '<td>'+e(r.Filial)+'</td>'+
       '<td>'+e(r.Amazem_Destino)+'</td>'+
-      '<td style="max-width:150px">'+e(r.Transportadora___Devolucao)+'</td>'+
+      '<td>'+e(r.Temperatura_do_Produto)+'</td>'+
       '<td>'+badge(r.Andamento)+'</td>'+
       '<td>'+slaHtml(r)+'</td>'+
       '<td style="max-width:130px">'+e(r.Causa_Raiz)+'</td>'+
@@ -433,7 +421,7 @@ function tabela(tipo){
   document.getElementById(wid).innerHTML=
     '<table><thead><tr>'+
     '<th>Protocolo</th><th>NF Origem</th><th>Filial</th>'+
-    '<th>Armazém</th><th>Transportadora</th><th>Status</th>'+
+    '<th>Armazém Destino</th><th>Temperatura</th><th>Status</th>'+
     '<th>SLA</th><th>Causa Raiz</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table>'
 }
@@ -460,7 +448,7 @@ function buscar(q,tipo){
       return (r.Protocolo||'').toLowerCase().includes(q)||
              (r.NF_Origem||'').toLowerCase().includes(q)||
              (r.Amazem_Destino||'').toLowerCase().includes(q)||
-             (r.Transportadora___Devolucao||'').toLowerCase().includes(q)
+             (r.Temperatura_do_Produto||'').toLowerCase().includes(q)
     })
     if(tipo==='pend')pgPend=0;else pgTodos=0
     tabela(tipo)
@@ -470,21 +458,37 @@ function buscar(q,tipo){
 // ── MODAL ─────────────────────────────────────
 function abrir(r){
   var slaCalc=calcSLA(r)
-  var slaTexto=slaCalc!==null?slaCalc+'d ('+(r.Andamento==='Concluído'?'finalizado':'em aberto')+')':'—'
+  var andamento=(r.Andamento||'').trim()
+  var slaTexto=slaCalc!==null
+    ? slaCalc+'d ('+(andamento==='Concluído'?'encerrado — retorno menos envio':'em aberto — envio até hoje')+')'
+    : '—'
+
   document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
   document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)
+
   var campos=[
-    ['NF Origem',r.NF_Origem],['Filial',r.Filial],
-    ['Armazém Destino',r.Amazem_Destino],['Transportadora Dev.',r.Transportadora___Devolucao],
-    ['Transportadora Qual.',r.Transportadora_Qualidade],['Temperatura',r.Temperatura_do_Produto],
-    ['Data Envio Qualidade',r.Data_Envio_para_Qualidade],['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],
-    ['Data Receb. Filial',r.Data_Recebimento_Filial],['Data Retorno Dev.',r.Data_Retorno_para_Devolucao],
-    ['Andamento',r.Andamento],['SLA Calculado',slaTexto],
-    ['Causa Raiz',r.Causa_Raiz],['Parecer Qualidade',r.Parecer_da_Qualidade],
-    ['Obs. Devolução',r.Observacao_Devolucao],['Obs. Qualidade',r.Observacao_Qualidade],
-    ['Usuário',r.Usuario],['Usuário Qualidade',r.Usuario_Qualidade],
-    ['Validação',r.Validacao],['SLA Aging (banco)',r.SLA_AGING],
+    ['NF Origem',r.NF_Origem],
+    ['Filial',r.Filial],
+    ['Armazém Destino',r.Amazem_Destino],
+    ['Temperatura do Produto',r.Temperatura_do_Produto],
+    ['Transportadora Dev.',r.Transportadora___Devolucao],
+    ['Transportadora Qual.',r.Transportadora_Qualidade],
+    ['Data Envio Qualidade',r.Data_Envio_para_Qualidade],
+    ['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],
+    ['Data Receb. Filial',r.Data_Recebimento_Filial],
+    ['Data Retorno Dev.',r.Data_Retorno_para_Devolucao],
+    ['Andamento',r.Andamento],
+    ['SLA Calculado',slaTexto],
+    ['Causa Raiz',r.Causa_Raiz],
+    ['Parecer Qualidade',r.Parecer_da_Qualidade],
+    ['Obs. Devolução',r.Observacao_Devolucao],
+    ['Obs. Qualidade',r.Observacao_Qualidade],
+    ['Usuário',r.Usuario],
+    ['Usuário Qualidade',r.Usuario_Qualidade],
+    ['Validação',r.Validacao],
+    ['Nome Cliente',r.Nome_Cliente],
   ]
+
   document.getElementById('m-body').innerHTML=campos.map(function(p){
     return '<div class="di"><div class="dl">'+p[0]+'</div><div class="dv">'+(p[1]||'—')+'</div></div>'
   }).join('')
