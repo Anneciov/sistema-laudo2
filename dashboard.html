@@ -263,7 +263,33 @@ async function carregar(){
   popularFiliais()
   filtrar()
 }
+async function carregar(){
+  document.getElementById('totalLabel').textContent='carregando...'
+  var acum=[], pg=0, tam=1000
+  while(true){
+    var res=await _sb.from('tbl_baselaudo').select('*').range(pg*tam,(pg+1)*tam-1).order('Protocolo',{ascending:false})
+    if(res.error||!res.data||res.data.length===0)break
+    acum=acum.concat(res.data)
+    if(res.data.length<tam)break
+    pg++
+  }
+  todos=acum
 
+  // ← DEBUG TEMPORÁRIO: mostra formato das datas de 3 registros concluídos
+  var concluidos=todos.filter(function(r){return r.Andamento==='Concluído'}).slice(0,3)
+  concluidos.forEach(function(r,i){
+    console.log('Registro '+i+':')
+    console.log('  Data_Envio_para_Qualidade = ['+r.Data_Envio_para_Qualidade+'] tipo: '+typeof r.Data_Envio_para_Qualidade)
+    console.log('  Data_Retorno_da_Qualidade = ['+r.Data_Retorno_da_Qualidade+'] tipo: '+typeof r.Data_Retorno_da_Qualidade)
+    console.log('  parseBR envio = ', parseBR(r.Data_Envio_para_Qualidade))
+    console.log('  parseBR retorno = ', parseBR(r.Data_Retorno_da_Qualidade))
+    console.log('  calcSLA = ', calcSLA(r))
+  })
+
+  document.getElementById('totalLabel').textContent=todos.length.toLocaleString('pt-BR')+' registros'
+  popularFiliais()
+  filtrar()
+}
 function reload(){todos=[];filtrado=[];carregar()}
 
 function popularFiliais(){
