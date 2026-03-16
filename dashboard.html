@@ -342,12 +342,27 @@ function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
   var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
-  var slas=filtrado
-    .filter(function(r){return r.Andamento==='Pendente'})
+
+  // Status do Parecer que NÃO entram no cálculo da média
+  var parecerExcluidos=[
+    'aguardando retorno de evidência transportador',
+    'aguardando retorno de estabilidade',
+    'em analise',
+    'em analise qualidade'
+  ]
+
+  // SLA médio de TODOS (pendentes + concluídos), excluindo os pareceres acima
+  var slasTodos=filtrado
+    .filter(function(r){
+      var parecer=(r.Parecer_da_Qualidade||'').toLowerCase().trim()
+      return parecerExcluidos.indexOf(parecer)===-1
+    })
     .map(function(r){return calcSLA(r)})
     .filter(function(v){return v!==null})
-  var media=slas.length?Math.round(slas.reduce(function(a,b){return a+b},0)/slas.length):0
-  document.getElementById('mTotal').textContent=n.toLocaleString('pt-BR')
+
+  var media=slasTodos.length?Math.round(slasTodos.reduce(function(a,b){return a+b},0)/slasTodos.length):0
+
+  document.getElementById('mTotal').textContent=n.toLocaleString('pt-BR')      
   document.getElementById('mPend').textContent=p.toLocaleString('pt-BR')
   document.getElementById('mConc').textContent=c.toLocaleString('pt-BR')
   document.getElementById('mSla').textContent=media+'d'
