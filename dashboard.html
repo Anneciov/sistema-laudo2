@@ -21,107 +21,39 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--s1)}
 ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
-
-/* SIDEBAR */
-.sidebar{
-  position:fixed;top:0;left:0;bottom:0;width:240px;
-  background:var(--s1);border-right:1px solid var(--b1);
-  display:flex;flex-direction:column;z-index:100;
-}
-.sb-logo{
-  display:flex;align-items:center;gap:12px;
-  padding:20px 20px 18px;border-bottom:1px solid var(--b1);
-}
-.sb-logo-icon{
-  width:36px;height:36px;border-radius:8px;
-  background:linear-gradient(135deg,var(--acc),var(--acc2));
-  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
-}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;z-index:100}
+.sb-logo{display:flex;align-items:center;gap:12px;padding:20px 20px 18px;border-bottom:1px solid var(--b1)}
+.sb-logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .sb-logo-name{font-size:14px;font-weight:600;letter-spacing:-0.3px}
 .sb-logo-sub{font-size:10px;color:var(--txt2);font-family:'JetBrains Mono',monospace;letter-spacing:1px}
 .sb-nav{padding:12px 10px;flex:1;overflow-y:auto}
 .sb-sec{font-size:10px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;padding:10px 10px 6px;font-weight:600}
-.nav-btn{
-  display:flex;align-items:center;gap:10px;width:100%;
-  padding:9px 12px;border-radius:var(--r);border:none;background:none;
-  color:var(--txt2);font-size:13px;font-weight:500;cursor:pointer;
-  transition:all 0.15s;text-align:left;margin-bottom:2px;
-}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:var(--r);border:none;background:none;color:var(--txt2);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;text-align:left;margin-bottom:2px}
 .nav-btn:hover{background:var(--s2);color:var(--txt)}
 .nav-btn.active{background:rgba(47,129,247,0.15);color:var(--acc);border:1px solid rgba(47,129,247,0.2)}
 .nav-btn .icon{width:18px;text-align:center;font-size:14px}
 .sb-footer{padding:12px;border-top:1px solid var(--b1)}
-.user-card{
-  display:flex;align-items:center;gap:10px;
-  padding:10px;border-radius:var(--r);background:var(--s2);
-  border:1px solid var(--b1);margin-bottom:8px;
-}
-.avatar{
-  width:32px;height:32px;border-radius:50%;
-  background:linear-gradient(135deg,var(--acc),var(--pur));
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:700;flex-shrink:0;color:#fff;
-}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r);background:var(--s2);border:1px solid var(--b1);margin-bottom:8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--pur));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff}
 .user-name{font-size:12px;font-weight:600}
 .user-email{font-size:11px;color:var(--txt2)}
-.btn-logout{
-  width:100%;padding:8px;background:none;
-  border:1px solid var(--b1);border-radius:var(--r);
-  color:var(--txt2);font-size:12px;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all 0.15s;
-}
+.btn-logout{width:100%;padding:8px;background:none;border:1px solid var(--b1);border-radius:var(--r);color:var(--txt2);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
 .btn-logout:hover{border-color:var(--err);color:var(--err);background:rgba(248,81,73,0.08)}
-
-/* MAIN */
 .main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 28px 0;
-}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0}
 .page-title{font-size:20px;font-weight:700;letter-spacing:-0.5px}
 .page-sub{font-size:12px;color:var(--txt2);margin-top:2px}
 .filters{display:flex;gap:8px;align-items:center}
-select{
-  padding:7px 12px;background:var(--s2);border:1px solid var(--b1);
-  border-radius:var(--r);color:var(--txt);font-family:'Inter',sans-serif;
-  font-size:12px;cursor:pointer;outline:none;transition:border-color 0.15s;
-}
+select{padding:7px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;outline:none;transition:border-color 0.15s}
 select:focus{border-color:var(--acc)}
-.btn-act{
-  padding:7px 14px;border-radius:var(--r);border:1px solid;
-  font-size:12px;font-weight:500;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all 0.15s;
-}
+.btn-act{padding:7px 14px;border-radius:var(--r);border:1px solid;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
 .btn-blue{background:rgba(47,129,247,0.1);border-color:rgba(47,129,247,0.3);color:var(--acc)}
 .btn-blue:hover{background:rgba(47,129,247,0.2)}
 .content{padding:20px 28px 28px;flex:1}
-
-/* LOADING GLOBAL */
-.global-loader{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:60vh;gap:16px;color:var(--txt2);
-}
-.big-spinner{
-  width:40px;height:40px;border:3px solid var(--s3);
-  border-top-color:var(--acc);border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
-.load-text{font-size:13px}
-.load-sub{font-size:11px;color:var(--txt3)}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* MÉTRICAS */
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.mc{
-  background:var(--s1);border:1px solid var(--b1);
-  border-radius:var(--r2);padding:18px 20px;position:relative;overflow:hidden;
-  transition:border-color 0.2s;
-}
+.mc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
 .mc:hover{border-color:var(--b2)}
-.mc::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  opacity:0.6;
-}
+.mc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;opacity:0.6}
 .mc.blue::after{background:linear-gradient(90deg,var(--acc),var(--acc2))}
 .mc.yellow::after{background:linear-gradient(90deg,var(--warn),#fb923c)}
 .mc.green::after{background:linear-gradient(90deg,var(--ok),#34d399)}
@@ -134,8 +66,6 @@ select:focus{border-color:var(--acc)}
 .mc-val.purple{color:var(--pur)}
 .mc-sub{font-size:11px;color:var(--txt3);margin-top:6px}
 .mc-icon{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.3}
-
-/* GRÁFICOS */
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 .cc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:18px 20px}
 .cc.wide{grid-column:span 2}
@@ -143,70 +73,37 @@ select:focus{border-color:var(--acc)}
 .cc-sub{font-size:11px;color:var(--txt2);margin-bottom:16px}
 .cc-wrap{position:relative;height:200px}
 .cc-wrap.tall{height:240px}
-
-/* TABELA */
 .tc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:16px}
-.tc-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px;border-bottom:1px solid var(--b1);
-}
+.tc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1)}
 .tc-title{font-size:13px;font-weight:600}
-.tc-actions{display:flex;gap:8px;align-items:center}
-.search{
-  padding:6px 12px;background:var(--s2);border:1px solid var(--b1);
-  border-radius:var(--r);color:var(--txt);font-size:12px;
-  font-family:'Inter',sans-serif;width:220px;outline:none;transition:border-color 0.15s;
-}
+.search{padding:6px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;width:240px;outline:none;transition:border-color 0.15s}
 .search:focus{border-color:var(--acc)}
 table{width:100%;border-collapse:collapse}
-th{
-  text-align:left;font-size:10px;font-weight:600;color:var(--txt2);
-  text-transform:uppercase;letter-spacing:0.8px;
-  padding:10px 18px;border-bottom:1px solid var(--b1);
-  background:var(--s2);white-space:nowrap;
-}
-td{
-  padding:11px 18px;font-size:12px;
-  border-bottom:1px solid rgba(48,54,61,0.5);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
-}
+th{text-align:left;font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.8px;padding:10px 18px;border-bottom:1px solid var(--b1);background:var(--s2);white-space:nowrap}
+td{padding:11px 18px;font-size:12px;border-bottom:1px solid rgba(48,54,61,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 .mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2)}
-.badge{
-  padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;
-  font-family:'JetBrains Mono',monospace;display:inline-block;
-}
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;display:inline-block}
 .b-pend{background:rgba(210,153,34,0.15);color:var(--warn);border:1px solid rgba(210,153,34,0.2)}
 .b-ok{background:rgba(63,185,80,0.15);color:var(--ok);border:1px solid rgba(63,185,80,0.2)}
 .b-blue{background:rgba(47,129,247,0.15);color:var(--acc);border:1px solid rgba(47,129,247,0.2)}
 .b-nd{background:rgba(72,79,88,0.3);color:var(--txt2);border:1px solid var(--b1)}
-.pag{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 18px;border-top:1px solid var(--b1);font-size:11px;color:var(--txt2);
-}
+
+/* SLA BADGE DINÂMICO */
+.sla-ok{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)}
+.sla-warn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--warn)}
+.sla-danger{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--err)}
+.sla-closed{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2)}
+
+.pag{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--b1);font-size:11px;color:var(--txt2)}
 .pag-btns{display:flex;gap:6px}
-.pb{
-  padding:4px 10px;background:var(--s2);border:1px solid var(--b1);
-  border-radius:6px;color:var(--txt);font-size:11px;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all 0.15s;
-}
+.pb{padding:4px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;color:var(--txt);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
 .pb:hover{border-color:var(--acc);color:var(--acc)}
 .pb:disabled{opacity:0.3;cursor:not-allowed}
-
-/* MODAL */
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.8);
-  z-index:300;display:none;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);
-}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .overlay.open{display:flex}
-.modal{
-  background:var(--s1);border:1px solid var(--b1);
-  border-radius:16px;width:720px;max-height:88vh;
-  overflow-y:auto;padding:26px;
-  box-shadow:0 24px 64px rgba(0,0,0,0.6);
-}
+.modal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;width:720px;max-height:88vh;overflow-y:auto;padding:26px;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
 .modal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
 .modal-title{font-size:15px;font-weight:700}
 .modal-sub{font-size:11px;color:var(--txt2);margin-top:4px;font-family:'JetBrains Mono',monospace}
@@ -216,15 +113,11 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 .di{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px}
 .dl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:5px}
 .dv{font-size:12px;font-weight:500;color:var(--txt)}
-
 .section{display:none}
 .section.active{display:block}
 .empty{text-align:center;padding:48px;color:var(--txt2);font-size:13px}
-.mini-spin{
-  display:inline-block;width:14px;height:14px;
-  border:2px solid var(--b1);border-top-color:var(--acc);
-  border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;
-}
+.mini-spin{display:inline-block;width:14px;height:14px;border:2px solid var(--b1);border-top-color:var(--acc);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -275,27 +168,25 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 
   <div class="content">
 
-    <!-- DASHBOARD -->
     <div class="section active" id="s-dashboard">
       <div class="metrics">
         <div class="mc blue"><div class="mc-icon">📦</div><div class="mc-label">Total Registros</div><div class="mc-val blue" id="mTotal">—</div><div class="mc-sub">em todas as filiais</div></div>
         <div class="mc yellow"><div class="mc-icon">⏳</div><div class="mc-label">Pendentes</div><div class="mc-val yellow" id="mPend">—</div><div class="mc-sub">aguardando ação</div></div>
         <div class="mc green"><div class="mc-icon">✓</div><div class="mc-label">Concluídos</div><div class="mc-val green" id="mConc">—</div><div class="mc-sub">finalizados</div></div>
-        <div class="mc purple"><div class="mc-icon">⏱</div><div class="mc-label">SLA Médio</div><div class="mc-val purple" id="mSla">—</div><div class="mc-sub">dias em aging</div></div>
+        <div class="mc purple"><div class="mc-icon">⏱</div><div class="mc-label">SLA Médio Pendentes</div><div class="mc-val purple" id="mSla">—</div><div class="mc-sub">dias em aberto</div></div>
       </div>
       <div class="charts">
-        <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual dos registros</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
+        <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
         <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
         <div class="cc wide"><div class="cc-title">Volume por Filial</div><div class="cc-sub">Quantidade de registros por unidade</div><div class="cc-wrap tall"><canvas id="cFilial"></canvas></div></div>
       </div>
     </div>
 
-    <!-- PENDÊNCIAS -->
     <div class="section" id="s-pendencias">
       <div class="tc">
         <div class="tc-head">
           <div class="tc-title">⧖ Pendências <span id="badge-pend" style="font-size:11px;color:var(--txt2)"></span></div>
-          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo, cliente..." oninput="buscar(this.value,'pend')">
+          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'pend')">
         </div>
         <div id="wrap-pend"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
         <div class="pag">
@@ -308,12 +199,11 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       </div>
     </div>
 
-    <!-- TODOS -->
     <div class="section" id="s-todos">
       <div class="tc">
         <div class="tc-head">
           <div class="tc-title">☰ Todos os Registros <span id="badge-todos" style="font-size:11px;color:var(--txt2)"></span></div>
-          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo, cliente..." oninput="buscar(this.value,'todos')">
+          <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'todos')">
         </div>
         <div id="wrap-todos"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
         <div class="pag">
@@ -329,7 +219,6 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
   </div>
 </main>
 
-<!-- MODAL -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)fechar()">
   <div class="modal">
     <div class="modal-top">
@@ -351,7 +240,7 @@ var _sb = supabase.createClient(
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}
 
-// AUTH
+// ── AUTH ──────────────────────────────────────
 _sb.auth.getSession().then(function(r){
   if(!r.data||!r.data.session){location.href='index.html';return}
   var u=r.data.session.user
@@ -363,22 +252,19 @@ _sb.auth.getSession().then(function(r){
 
 function sair(){_sb.auth.signOut().then(function(){location.href='index.html'})}
 
-// CARREGA TODOS OS DADOS COM PAGINAÇÃO DO SUPABASE
+// ── CARGA TOTAL COM PAGINAÇÃO ─────────────────
 async function carregar(){
   document.getElementById('totalLabel').textContent='carregando...'
-  var acum=[]
-  var pagina=0
-  var tam=1000
+  var acum=[], pag=0, tam=1000
   while(true){
-    var res=await _sb.from('tbl_baselaudo').select('*').range(pagina*tam,(pagina+1)*tam-1).order('Protocolo',{ascending:false})
-    if(res.error){console.error(res.error);break}
-    if(!res.data||res.data.length===0)break
+    var res=await _sb.from('tbl_baselaudo').select('*').range(pag*tam,(pag+1)*tam-1).order('Protocolo',{ascending:false})
+    if(res.error||!res.data||res.data.length===0)break
     acum=acum.concat(res.data)
     if(res.data.length<tam)break
-    pagina++
+    pag++
   }
   todos=acum
-  document.getElementById('totalLabel').textContent=todos.length.toLocaleString('pt-BR')+' registros carregados'
+  document.getElementById('totalLabel').textContent=todos.length.toLocaleString('pt-BR')+' registros'
   popularFiliais()
   filtrar()
 }
@@ -389,10 +275,7 @@ function popularFiliais(){
   var sel=document.getElementById('selFilial')
   var fs=[...new Set(todos.map(function(r){return r.Filial}).filter(Boolean))].sort()
   sel.innerHTML='<option value="">Todas as filiais</option>'
-  fs.forEach(function(f){
-    var o=document.createElement('option')
-    o.value=f;o.textContent='Filial '+f;sel.appendChild(o)
-  })
+  fs.forEach(function(f){var o=document.createElement('option');o.value=f;o.textContent='Filial '+f;sel.appendChild(o)})
 }
 
 function filtrar(){
@@ -407,11 +290,65 @@ function filtrar(){
   metricas();graficos();tabela('pend');tabela('todos')
 }
 
+// ── CÁLCULO SLA ───────────────────────────────
+// Pendente  → Data_Envio_para_Qualidade até HOJE (contínuo)
+// Concluído → Data_Envio_para_Qualidade até Data_Retorno_da_Qualidade (fixo)
+function calcSLA(r){
+  var envio = parseBR(r.Data_Envio_para_Qualidade)
+  if(!envio) return null
+
+  var andamento = (r.Andamento||'').trim()
+
+  if(andamento==='Concluído'){
+    var retorno = parseBR(r.Data_Retorno_da_Qualidade)
+    if(!retorno) return null
+    return diffDias(envio, retorno)
+  }
+
+  // Pendente ou qualquer outro: até hoje
+  return diffDias(envio, new Date())
+}
+
+function parseBR(v){
+  if(!v) return null
+  v = v.toString().trim()
+  // Tenta dd/mm/yyyy
+  var m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if(m) return new Date(+m[3], +m[2]-1, +m[1])
+  // Tenta yyyy-mm-dd
+  var m2 = v.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if(m2) return new Date(+m2[1], +m2[2]-1, +m2[3])
+  return null
+}
+
+function diffDias(d1, d2){
+  var ms = d2 - d1
+  return Math.max(0, Math.floor(ms/(1000*60*60*24)))
+}
+
+function slaHtml(r){
+  var dias = calcSLA(r)
+  if(dias===null) return '<span class="sla-closed">—</span>'
+  var andamento = (r.Andamento||'').trim()
+  if(andamento==='Concluído'){
+    return '<span class="sla-closed">'+dias+'d ✓</span>'
+  }
+  // Pendente — colorir por urgência
+  if(dias<=7)  return '<span class="sla-ok">'+dias+'d</span>'
+  if(dias<=15) return '<span class="sla-warn">'+dias+'d ⚠</span>'
+  return '<span class="sla-danger">'+dias+'d !</span>'
+}
+
+// ── MÉTRICAS ──────────────────────────────────
 function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
   var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
-  var slas=filtrado.map(function(r){return parseInt(r.SLA_AGING)}).filter(function(n){return !isNaN(n)})
+  // SLA médio só dos pendentes
+  var slas=filtrado
+    .filter(function(r){return r.Andamento==='Pendente'})
+    .map(function(r){return calcSLA(r)})
+    .filter(function(v){return v!==null})
   var media=slas.length?Math.round(slas.reduce(function(a,b){return a+b},0)/slas.length):0
   document.getElementById('mTotal').textContent=n.toLocaleString('pt-BR')
   document.getElementById('mPend').textContent=p.toLocaleString('pt-BR')
@@ -419,17 +356,15 @@ function metricas(){
   document.getElementById('mSla').textContent=media+'d'
 }
 
+// ── GRÁFICOS ──────────────────────────────────
 function graficos(){
-  // Status
   var sm={}
   filtrado.forEach(function(r){var s=r.Andamento||'N/D';sm[s]=(sm[s]||0)+1})
   donut('cStatus',sm,['#2f81f7','#d29922','#3fb950','#bc8cff','#f85149','#484f58'])
-  // Causa
   var cm={}
   filtrado.forEach(function(r){var c=r.Causa_Raiz||'Não informado';cm[c]=(cm[c]||0)+1})
   var top=Object.entries(cm).sort(function(a,b){return b[1]-a[1]}).slice(0,7)
   barra('cCausa',Object.fromEntries(top),'#bc8cff')
-  // Filial
   var fm={}
   filtrado.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
@@ -439,29 +374,25 @@ function graficos(){
 function donut(id,data,colors){
   if(charts[id])charts[id].destroy()
   var ctx=document.getElementById(id);if(!ctx)return
-  charts[id]=new Chart(ctx,{
-    type:'doughnut',
+  charts[id]=new Chart(ctx,{type:'doughnut',
     data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:11,family:'Inter'},padding:10,boxWidth:10}}}}
-  })
+      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:11,family:'Inter'},padding:10,boxWidth:10}}}}})
 }
 
 function barra(id,data,cor){
   if(charts[id])charts[id].destroy()
   var ctx=document.getElementById(id);if(!ctx)return
-  charts[id]=new Chart(ctx,{
-    type:'bar',
+  charts[id]=new Chart(ctx,{type:'bar',
     data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:cor+'44',borderColor:cor,borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{
         x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},
         y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}}
-      }}
-  })
+      }}})
 }
 
+// ── TABELAS ───────────────────────────────────
 function tabela(tipo){
   var isPend=tipo==='pend'
   var dados=isPend?filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento}):filtrado
@@ -472,12 +403,12 @@ function tabela(tipo){
 
   if(isPend){
     document.getElementById('badge-pend').textContent='· '+tot+' registros'
-    document.getElementById('pi-pend').textContent=(Math.min(ini+1,tot))+' – '+(Math.min(ini+PG,tot))+' de '+tot.toLocaleString('pt-BR')
+    document.getElementById('pi-pend').textContent=Math.min(ini+1,tot)+' – '+Math.min(ini+PG,tot)+' de '+tot.toLocaleString('pt-BR')
     document.getElementById('pp-prev').disabled=pg===0
     document.getElementById('pp-next').disabled=ini+PG>=tot
   } else {
     document.getElementById('badge-todos').textContent='· '+tot+' registros'
-    document.getElementById('pi-todos').textContent=(Math.min(ini+1,tot))+' – '+(Math.min(ini+PG,tot))+' de '+tot.toLocaleString('pt-BR')
+    document.getElementById('pi-todos').textContent=Math.min(ini+1,tot)+' – '+Math.min(ini+PG,tot)+' de '+tot.toLocaleString('pt-BR')
     document.getElementById('pt-prev').disabled=pg===0
     document.getElementById('pt-next').disabled=ini+PG>=tot
   }
@@ -487,22 +418,22 @@ function tabela(tipo){
 
   var rows=fatia.map(function(r){
     var j=JSON.stringify(r).replace(/\\/g,'\\\\').replace(/'/g,'&#39;')
-    return '<tr onclick=\'abrir('+j+')\'>'+
+    return '<tr onclick=\'abrir('+j+')\'>' +
       '<td class="mono">'+e(r.Protocolo)+'</td>'+
       '<td class="mono">'+e(r.NF_Origem)+'</td>'+
       '<td>'+e(r.Filial)+'</td>'+
-      '<td style="max-width:160px">'+e(r.Nome_Cliente)+'</td>'+
-      '<td>'+e(r.Produto)+'</td>'+
+      '<td>'+e(r.Amazem_Destino)+'</td>'+
+      '<td style="max-width:150px">'+e(r.Transportadora___Devolucao)+'</td>'+
       '<td>'+badge(r.Andamento)+'</td>'+
-      '<td class="mono">'+e(r.SLA_AGING)+'</td>'+
-      '<td style="max-width:120px">'+e(r.Causa_Raiz)+'</td>'+
+      '<td>'+slaHtml(r)+'</td>'+
+      '<td style="max-width:130px">'+e(r.Causa_Raiz)+'</td>'+
     '</tr>'
   }).join('')
 
   document.getElementById(wid).innerHTML=
     '<table><thead><tr>'+
     '<th>Protocolo</th><th>NF Origem</th><th>Filial</th>'+
-    '<th>Cliente</th><th>Produto</th><th>Status</th>'+
+    '<th>Armazém</th><th>Transportadora</th><th>Status</th>'+
     '<th>SLA</th><th>Causa Raiz</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table>'
 }
@@ -528,29 +459,31 @@ function buscar(q,tipo){
     filtrado=todos.filter(function(r){
       return (r.Protocolo||'').toLowerCase().includes(q)||
              (r.NF_Origem||'').toLowerCase().includes(q)||
-             (r.Nome_Cliente||'').toLowerCase().includes(q)||
-             (r.Produto||'').toLowerCase().includes(q)
+             (r.Amazem_Destino||'').toLowerCase().includes(q)||
+             (r.Transportadora___Devolucao||'').toLowerCase().includes(q)
     })
     if(tipo==='pend')pgPend=0;else pgTodos=0
     tabela(tipo)
   },250)
 }
 
+// ── MODAL ─────────────────────────────────────
 function abrir(r){
+  var slaCalc=calcSLA(r)
+  var slaTexto=slaCalc!==null?slaCalc+'d ('+(r.Andamento==='Concluído'?'finalizado':'em aberto')+')':'—'
   document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
   document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)
   var campos=[
-    ['Cliente',r.Nome_Cliente],['CNPJ/CPF',r.CNPJ_OU_CPF],
-    ['Produto',r.Produto],['Descrição',r.Desc_Prod],
-    ['Loja',r.Loja],['Qtd Recebida',r.Qtd_Recebida],
-    ['Valor Unit.',r.Valor_Unit_],['Transportadora',r.Transportadora___Devolucao],
-    ['Amazém Destino',r.Amazem_Destino],['Temperatura',r.Temperatura_do_Produto],
-    ['Data Envio Qual.',r.Data_Envio_para_Qualidade],['Data Retorno',r.Data_Retorno_da_Qualidade],
-    ['Andamento',r.Andamento],['Causa Raiz',r.Causa_Raiz],
-    ['SLA Aging',r.SLA_AGING],['Parecer Qualidade',r.Parecer_da_Qualidade],
+    ['NF Origem',r.NF_Origem],['Filial',r.Filial],
+    ['Armazém Destino',r.Amazem_Destino],['Transportadora Dev.',r.Transportadora___Devolucao],
+    ['Transportadora Qual.',r.Transportadora_Qualidade],['Temperatura',r.Temperatura_do_Produto],
+    ['Data Envio Qualidade',r.Data_Envio_para_Qualidade],['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],
+    ['Data Receb. Filial',r.Data_Recebimento_Filial],['Data Retorno Dev.',r.Data_Retorno_para_Devolucao],
+    ['Andamento',r.Andamento],['SLA Calculado',slaTexto],
+    ['Causa Raiz',r.Causa_Raiz],['Parecer Qualidade',r.Parecer_da_Qualidade],
     ['Obs. Devolução',r.Observacao_Devolucao],['Obs. Qualidade',r.Observacao_Qualidade],
     ['Usuário',r.Usuario],['Usuário Qualidade',r.Usuario_Qualidade],
-    ['Data Receb. Filial',r.Data_Recebimento_Filial],['Validação',r.Validacao],
+    ['Validação',r.Validacao],['SLA Aging (banco)',r.SLA_AGING],
   ]
   document.getElementById('m-body').innerHTML=campos.map(function(p){
     return '<div class="di"><div class="dl">'+p[0]+'</div><div class="dv">'+(p[1]||'—')+'</div></div>'
@@ -560,19 +493,19 @@ function abrir(r){
 
 function fechar(){document.getElementById('overlay').classList.remove('open')}
 
+// ── NAVEGAÇÃO ─────────────────────────────────
 var secs={
   dashboard:{id:'s-dashboard',title:'Dashboard',sub:'Visão geral'},
   pendencias:{id:'s-pendencias',title:'Pendências',sub:'Registros aguardando ação'},
   todos:{id:'s-todos',title:'Todos os Registros',sub:'Histórico completo'},
 }
-
 function ir(nome,el){
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active')})
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')})
   document.getElementById(secs[nome].id).classList.add('active')
   el.classList.add('active')
   document.getElementById('pgTitle').textContent=secs[nome].title
-  document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros carregados</span>'
+  document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
 }
 </script>
 </body>
