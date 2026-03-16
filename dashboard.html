@@ -168,29 +168,22 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 
   <div class="content">
 
+    <!-- DASHBOARD -->
     <div class="section active" id="s-dashboard">
       <div class="metrics">
         <div class="mc blue"><div class="mc-icon">📦</div><div class="mc-label">Total Registros</div><div class="mc-val blue" id="mTotal">—</div><div class="mc-sub">em todas as filiais</div></div>
         <div class="mc yellow"><div class="mc-icon">⏳</div><div class="mc-label">Pendentes</div><div class="mc-val yellow" id="mPend">—</div><div class="mc-sub">aguardando ação</div></div>
         <div class="mc green"><div class="mc-icon">✓</div><div class="mc-label">Concluídos</div><div class="mc-val green" id="mConc">—</div><div class="mc-sub">finalizados</div></div>
-        <div class="mc purple"><div class="mc-icon">⏱</div><div class="mc-label">SLA Médio Geral</div><div class="mc-val purple" id="mSla">—</div><div class="mc-sub">excl. aguardando/análise</div></div>
+        <div class="mc purple"><div class="mc-icon">⏱</div><div class="mc-label">SLA Médio Pendentes</div><div class="mc-val purple" id="mSla">—</div><div class="mc-sub">dias em aberto</div></div>
       </div>
       <div class="charts">
         <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
         <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
         <div class="cc wide"><div class="cc-title">Volume por Filial</div><div class="cc-sub">Quantidade de registros por unidade</div><div class="cc-wrap tall"><canvas id="cFilial"></canvas></div></div>
-        <div class="cc wide">
-          <div class="cc-title">SLA Médio por Filial</div>
-          <div class="cc-sub">Dias médios por filial · pendentes (contínuo) + concluídos (fixo) · excl. aguardando/análise</div>
-          <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--txt2)">
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block"></span>Pendentes</span>
-            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#3fb950;display:inline-block"></span>Concluídos</span>
-          </div>
-          <div class="cc-wrap tall"><canvas id="cSlaFilial"></canvas></div>
-        </div>
       </div>
     </div>
 
+    <!-- PENDÊNCIAS -->
     <div class="section" id="s-pendencias">
       <div class="tc">
         <div class="tc-head">
@@ -211,6 +204,7 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       </div>
     </div>
 
+    <!-- TODOS -->
     <div class="section" id="s-todos">
       <div class="tc">
         <div class="tc-head">
@@ -234,6 +228,7 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
   </div>
 </main>
 
+<!-- MODAL -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)fechar()">
   <div class="modal">
     <div class="modal-top">
@@ -254,34 +249,6 @@ var _sb = supabase.createClient(
 )
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}
-
-// Pareceres excluídos do cálculo de SLA médio
-var PARECER_EXCLUIDOS=[
-  'aguardando retorno de evidencia transportador',
-  'aguardando retorno de evidencia transportadora',
-  'aguardando retorno de estabilidade',
-  'em analise',
-  'em analise qualidade'
-]
-
-function parecerExcluido(r){
-  var p=(r.Parecer_da_Qualidade||'').toLowerCase().trim()
-  p=p.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  return PARECER_EXCLUIDOS.some(function(ex){
-    return p===ex||p.indexOf(ex)>-1
-  })
-}
-
-// Pareceres excluídos do cálculo de SLA médio
-var PARECER_EXCLUIDOS=[
-  'aguardando retorno de evidencia transportador',
-  'aguardando retorno de evidência transportador',
-  'aguardando retorno de estabilidade',
-  'em analise',
-  'em analise qualidade',
-  'em análise',
-  'em análise qualidade'
-]
 
 // ── AUTH ──────────────────────────────────────
 _sb.auth.getSession().then(function(r){
@@ -360,16 +327,6 @@ function diffDias(d1,d2){
   return Math.max(0,Math.floor((d2-d1)/(1000*60*60*24)))
 }
 
-function parecerExcluido(r){
-  var p=(r.Parecer_da_Qualidade||'').toLowerCase().trim()
-  // Remove acentos para comparação mais robusta
-  p=p.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  return PARECER_EXCLUIDOS.some(function(ex){
-    var exNorm=ex.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    return p===exNorm||p.indexOf(exNorm)>-1
-  })
-}
-
 function slaHtml(r){
   var dias=calcSLA(r)
   if(dias===null) return '<span class="sla-closed">—</span>'
@@ -385,17 +342,11 @@ function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
   var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
-
-  // SLA médio de TODOS os registros, excluindo os pareceres bloqueados
-  var slasTodos=filtrado
-    .filter(function(r){ return !parecerExcluido(r) })
-    .map(function(r){ return calcSLA(r) })
-    .filter(function(v){ return v!==null })
-
-  var media=slasTodos.length
-    ? Math.round(slasTodos.reduce(function(a,b){return a+b},0)/slasTodos.length)
-    : 0
-
+  var slas=filtrado
+    .filter(function(r){return r.Andamento==='Pendente'})
+    .map(function(r){return calcSLA(r)})
+    .filter(function(v){return v!==null})
+  var media=slas.length?Math.round(slas.reduce(function(a,b){return a+b},0)/slas.length):0
   document.getElementById('mTotal').textContent=n.toLocaleString('pt-BR')
   document.getElementById('mPend').textContent=p.toLocaleString('pt-BR')
   document.getElementById('mConc').textContent=c.toLocaleString('pt-BR')
@@ -415,33 +366,6 @@ function graficos(){
   filtrado.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
   barra('cFilial',Object.fromEntries(sf),'#3dc9b0')
-
-  // SLA médio por filial — separado por pendentes e concluídos
-  var filiais=[...new Set(filtrado.map(function(r){return r.Filial}).filter(Boolean))].sort()
-  var slaPend=[], slaConc=[]
-  filiais.forEach(function(f){
-    var regPend=filtrado.filter(function(r){return r.Filial===f&&r.Andamento==='Pendente'&&!parecerExcluido(r)})
-    var regConc=filtrado.filter(function(r){return r.Filial===f&&(r.Andamento==='Concluído'||r.Andamento==='Concluido')&&!parecerExcluido(r)})
-    var vPend=regPend.map(function(r){return calcSLA(r)}).filter(function(v){return v!==null})
-    var vConc=regConc.map(function(r){return calcSLA(r)}).filter(function(v){return v!==null})
-    slaPend.push(vPend.length?Math.round(vPend.reduce(function(a,b){return a+b},0)/vPend.length):0)
-    slaConc.push(vConc.length?Math.round(vConc.reduce(function(a,b){return a+b},0)/vConc.length):0)
-  })
-  var labelsFil=filiais.map(function(f){return 'F'+f})
-  if(charts['cSlaFilial'])charts['cSlaFilial'].destroy()
-  var ctx2=document.getElementById('cSlaFilial');if(ctx2){
-    charts['cSlaFilial']=new Chart(ctx2,{type:'bar',
-      data:{labels:labelsFil,datasets:[
-        {label:'Pendentes',data:slaPend,backgroundColor:'#f59e0b44',borderColor:'#f59e0b',borderWidth:1,borderRadius:4,borderSkipped:false},
-        {label:'Concluídos',data:slaConc,backgroundColor:'#3fb95044',borderColor:'#3fb950',borderWidth:1,borderRadius:4,borderSkipped:false}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{
-          x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},
-          y:{ticks:{color:'#8b949e',font:{size:10},callback:function(v){return v+'d'}},grid:{color:'#21262d'},border:{color:'#21262d'},title:{display:true,text:'dias',color:'#484f58',font:{size:10}}}
-        }}})
-  }
 }
 
 function donut(id,data,colors){
@@ -540,10 +464,14 @@ function buscar(q,tipo){
   },250)
 }
 
-// ── DOWNLOAD CSV ──────────────────────────────
+// ── DOWNLOAD CSV — sempre baixa os PENDENTES ──
 function downloadCSV(){
   var pendentes=todos.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
-  if(!pendentes.length){alert('Nenhum registro pendente para exportar.');return}
+
+  if(!pendentes.length){
+    alert('Nenhum registro pendente para exportar.')
+    return
+  }
 
   var cols=[
     'Protocolo','NF_Origem','Filial','Nome_Cliente','Produto',
@@ -553,27 +481,34 @@ function downloadCSV(){
     'Observacao_Qualidade','Usuario','Usuario_Qualidade','SLA_Calculado'
   ]
 
+  var header=cols.join(';')
+
   var linhas=pendentes.map(function(r){
-    var rCopy=Object.assign({},r)
     var sla=calcSLA(r)
+    var rCopy=Object.assign({},r)
     rCopy.SLA_Calculado=sla!==null?sla+'d':''
     return cols.map(function(c){
       var v=rCopy[c]!==undefined&&rCopy[c]!==null?String(rCopy[c]):''
+      // Escapa aspas e envolve em aspas se tiver ponto-e-vírgula ou quebra de linha
       v=v.replace(/"/g,'""')
       if(v.indexOf(';')>-1||v.indexOf('\n')>-1||v.indexOf('"')>-1) v='"'+v+'"'
       return v
     }).join(';')
   })
 
-  var csv='\uFEFF'+cols.join(';')+'\n'+linhas.join('\n')
+  var csv='\uFEFF'+header+'\n'+linhas.join('\n') // BOM para Excel abrir com acentos certos
+
   var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'})
   var url=URL.createObjectURL(blob)
   var a=document.createElement('a')
   var hoje=new Date()
-  var dt=hoje.getDate().toString().padStart(2,'0')+'_'+(hoje.getMonth()+1).toString().padStart(2,'0')+'_'+hoje.getFullYear()
-  a.href=url;a.download='pendentes_'+dt+'.csv'
-  document.body.appendChild(a);a.click()
-  document.body.removeChild(a);URL.revokeObjectURL(url)
+  var data=hoje.getDate().toString().padStart(2,'0')+'_'+(hoje.getMonth()+1).toString().padStart(2,'0')+'_'+hoje.getFullYear()
+  a.href=url
+  a.download='pendentes_'+data+'.csv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 // ── MODAL ─────────────────────────────────────
@@ -583,10 +518,9 @@ function abrir(r){
   var slaTexto=slaCalc!==null
     ? slaCalc+'d ('+(andamento==='Concluído'?'encerrado — retorno menos envio':'em aberto — envio até hoje')+')'
     : '—'
-  var excl=parecerExcluido(r)?'⚠ excluído do SLA médio':''
 
   document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
-  document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)+(excl?' · '+excl:'')
+  document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)
 
   var campos=[
     ['NF Origem',r.NF_Origem],
