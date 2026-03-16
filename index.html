@@ -420,6 +420,10 @@ function cadastrar(){
 
   if(!nome){mostrarErro('err-cad','Preencha o nome completo.');return}
   if(!email||!email.includes('@')){mostrarErro('err-cad','Informe um e-mail válido.');return}
+
+var dominiosPermitidos=['@mafrasaude.com.br','@viveo.com.br']
+var domOk=dominiosPermitidos.some(function(d){return email.toLowerCase().endsWith(d)})
+if(!domOk){mostrarErro('err-cad','Apenas e-mails @mafrasaude.com.br ou @viveo.com.br são permitidos.');return}
   if(senha.length<8){mostrarErro('err-cad','A senha precisa ter ao menos 8 caracteres.');return}
   if(senha!==conf){mostrarErro('err-cad','As senhas não coincidem.');return}
 
