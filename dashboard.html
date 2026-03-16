@@ -179,6 +179,15 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
         <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
         <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
         <div class="cc wide"><div class="cc-title">Volume por Filial</div><div class="cc-sub">Quantidade de registros por unidade</div><div class="cc-wrap tall"><canvas id="cFilial"></canvas></div></div>
+        <div class="cc wide">
+          <div class="cc-title">SLA Médio por Filial</div>
+          <div class="cc-sub">Dias médios por filial · pendentes (contínuo) + concluídos (fixo) · excl. aguardando/análise</div>
+          <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--txt2)">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block"></span>Pendentes</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#3fb950;display:inline-block"></span>Concluídos</span>
+          </div>
+          <div class="cc-wrap tall"><canvas id="cSlaFilial"></canvas></div>
+        </div>
       </div>
     </div>
 
@@ -406,6 +415,33 @@ function graficos(){
   filtrado.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
   barra('cFilial',Object.fromEntries(sf),'#3dc9b0')
+
+  // SLA médio por filial — separado por pendentes e concluídos
+  var filiais=[...new Set(filtrado.map(function(r){return r.Filial}).filter(Boolean))].sort()
+  var slaPend=[], slaConc=[]
+  filiais.forEach(function(f){
+    var regPend=filtrado.filter(function(r){return r.Filial===f&&r.Andamento==='Pendente'&&!parecerExcluido(r)})
+    var regConc=filtrado.filter(function(r){return r.Filial===f&&(r.Andamento==='Concluído'||r.Andamento==='Concluido')&&!parecerExcluido(r)})
+    var vPend=regPend.map(function(r){return calcSLA(r)}).filter(function(v){return v!==null})
+    var vConc=regConc.map(function(r){return calcSLA(r)}).filter(function(v){return v!==null})
+    slaPend.push(vPend.length?Math.round(vPend.reduce(function(a,b){return a+b},0)/vPend.length):0)
+    slaConc.push(vConc.length?Math.round(vConc.reduce(function(a,b){return a+b},0)/vConc.length):0)
+  })
+  var labelsFil=filiais.map(function(f){return 'F'+f})
+  if(charts['cSlaFilial'])charts['cSlaFilial'].destroy()
+  var ctx2=document.getElementById('cSlaFilial');if(ctx2){
+    charts['cSlaFilial']=new Chart(ctx2,{type:'bar',
+      data:{labels:labelsFil,datasets:[
+        {label:'Pendentes',data:slaPend,backgroundColor:'#f59e0b44',borderColor:'#f59e0b',borderWidth:1,borderRadius:4,borderSkipped:false},
+        {label:'Concluídos',data:slaConc,backgroundColor:'#3fb95044',borderColor:'#3fb950',borderWidth:1,borderRadius:4,borderSkipped:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},
+          y:{ticks:{color:'#8b949e',font:{size:10},callback:function(v){return v+'d'}},grid:{color:'#21262d'},border:{color:'#21262d'},title:{display:true,text:'dias',color:'#484f58',font:{size:10}}}
+        }}})
+  }
 }
 
 function donut(id,data,colors){
