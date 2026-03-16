@@ -58,4 +58,33 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1)
 <script>
 var _client = supabase.createClient(
   'https://jsppfrdhkekkkjemkzju.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vr
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vra2tqZW1remp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTc2MDIsImV4cCI6MjA4OTE3MzYwMn0.okK6pdZdhIcj9L_sLvLsc-iVnU_irisJoF1dDlSMbGg'
+)
+_client.auth.getSession().then(function(r){
+  if(r.data && r.data.session) location.href='dashboard.html'
+})
+document.getElementById('senha').onkeydown=function(e){if(e.key==='Enter')fazerLogin()}
+document.getElementById('btnLogin').onclick=fazerLogin
+function fazerLogin(){
+  var email=document.getElementById('email').value.trim()
+  var senha=document.getElementById('senha').value
+  var btn=document.getElementById('btnLogin')
+  var erro=document.getElementById('erro')
+  erro.style.display='none'
+  if(!email||!senha){erro.textContent='Preencha e-mail e senha.';erro.style.display='block';return}
+  btn.disabled=true
+  btn.innerHTML='<span class="spinner"></span>Entrando...'
+  _client.auth.signInWithPassword({email:email,password:senha}).then(function(r){
+    if(r.error){
+      erro.textContent='Erro: '+r.error.message
+      erro.style.display='block'
+      btn.disabled=false
+      btn.innerHTML='Entrar'
+    }else{
+      location.href='dashboard.html'
+    }
+  })
+}
+</script>
+</body>
+</html>
