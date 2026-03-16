@@ -6,100 +6,28 @@
 <title>Sistema Laudo — Login</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --border: #1f2937;
-    --accent: #3b82f6;
-    --accent2: #06b6d4;
-    --text: #f9fafb;
-    --muted: #6b7280;
-    --danger: #ef4444;
-    --success: #10b981;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
-    background-image:
-      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  .bg-glow {
-    position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
-    width: 600px; height: 600px; z-index: 0;
-    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
-  }
-  .card {
-    position: relative; z-index: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-  }
-  .logo {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 32px;
-  }
-  .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
-  .logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  h1 { font-size: 24px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.5px; }
-  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
-  .field { margin-bottom: 18px; }
-  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
-  input {
-    width: 100%; padding: 12px 14px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-  .btn {
-    width: 100%; padding: 13px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; border-radius: 8px;
-    color: #fff; font-family: 'DM Sans', sans-serif;
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    margin-top: 8px; letter-spacing: 0.3px;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  .btn:hover { opacity: 0.9; }
-  .btn:active { transform: scale(0.99); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .error {
-    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
-    color: #fca5a5; border-radius: 8px; padding: 10px 14px;
-    font-size: 13px; margin-bottom: 16px; display: none;
-  }
-  .spinner {
-    display: inline-block; width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+:root{--bg:#0a0e1a;--surface:#111827;--border:#1f2937;--accent:#3b82f6;--accent2:#06b6d4;--text:#f9fafb;--muted:#6b7280}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:40px 40px}
+.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;z-index:0;background:radial-gradient(circle,rgba(59,130,246,0.12) 0%,transparent 70%)}
+.card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,0.5)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text{font-size:15px;font-weight:600}
+.logo-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+h1{font-size:24px;font-weight:600;margin-bottom:6px}
+.subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
+.field{margin-bottom:18px}
+label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase}
+input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity 0.2s}
+.btn:hover{opacity:0.9}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -118,57 +46,16 @@
   <div class="error" id="erro"></div>
   <div class="field">
     <label>E-mail</label>
-    <input type="email" id="email" placeholder="seu@email.com" autocomplete="email">
+    <input type="email" id="email" placeholder="seu@email.com">
   </div>
   <div class="field">
     <label>Senha</label>
-    <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+    <input type="password" id="senha" placeholder="••••••••">
   </div>
-  <button class="btn" id="btnLogin" onclick="login()">Entrar</button>
+  <button class="btn" id="btnLogin">Entrar</button>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-  const SUPA_URL = 'https://jsppfrdhkekkkjemkzju.supabase.co'
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vra2tqZW1remp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTc2MDIsImV4cCI6MjA4OTE3MzYwMn0.okK6pdZdhIcj9L_sLvLsc-iVnU_irisJoF1dDlSMbGg'
-  const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY)
-
-  // Redireciona se já logado
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session) window.location.href = 'dashboard.html'
-  })
-
-  document.getElementById('senha').addEventListener('keydown', e => {
-    if (e.key === 'Enter') login()
-  })
-
-  async function login() {
-    const email = document.getElementById('email').value.trim()
-    const senha = document.getElementById('senha').value
-    const btn   = document.getElementById('btnLogin')
-    const erro  = document.getElementById('erro')
-
-    erro.style.display = 'none'
-    if (!email || !senha) {
-      erro.textContent = 'Preencha e-mail e senha.'
-      erro.style.display = 'block'
-      return
-    }
-
-    btn.disabled = true
-    btn.innerHTML = '<span class="spinner"></span>Entrando...'
-
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
-
-    if (error) {
-      erro.textContent = 'E-mail ou senha incorretos.'
-      erro.style.display = 'block'
-      btn.disabled = false
-      btn.innerHTML = 'Entrar'
-    } else {
-      window.location.href = 'dashboard.html'
-    }
-  }
-</script>
-</body>
-</html>
+var _client = supabase.createClient(
+  'https://jsppfrdhkekkkjemkzju.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vr
