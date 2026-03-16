@@ -3,85 +3,448 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Laudo — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Sistema Laudo — Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-:root{--bg:#0a0e1a;--surface:#111827;--border:#1f2937;--accent:#3b82f6;--accent2:#06b6d4;--text:#f9fafb;--muted:#6b7280}
+:root{
+  --bg:#060910;--s1:#0d1117;--s2:#161b22;--s3:#21262d;
+  --b1:#30363d;--b2:#484f58;
+  --acc:#2f81f7;--acc2:#3dc9b0;
+  --txt:#e6edf3;--txt2:#8b949e;--txt3:#484f58;
+  --err:#f85149;--ok:#3fb950;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
-.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:40px 40px}
-.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;z-index:0;background:radial-gradient(circle,rgba(59,130,246,0.12) 0%,transparent 70%)}
-.card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,0.5)}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
-.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.logo-text{font-size:15px;font-weight:600}
-.logo-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-h1{font-size:24px;font-weight:600;margin-bottom:6px}
-.subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
-.field{margin-bottom:18px}
-label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase}
-input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
-.btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity 0.2s}
-.btn:hover{opacity:0.9}
-.btn:disabled{opacity:0.5;cursor:not-allowed}
-.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
+body{
+  font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* BACKGROUND ANIMADO */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(47,129,247,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(47,129,247,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:float 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:rgba(47,129,247,0.08);top:-150px;left:-100px;animation-delay:0s}
+.orb2{width:400px;height:400px;background:rgba(61,201,176,0.06);bottom:-100px;right:-80px;animation-delay:3s}
+.orb3{width:300px;height:300px;background:rgba(188,140,255,0.05);top:40%;left:40%;animation-delay:5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+/* LAYOUT */
+.wrap{
+  position:relative;z-index:1;
+  display:flex;align-items:stretch;
+  width:900px;max-width:95vw;
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.7);
+  min-height:560px;
+}
+
+/* PAINEL ESQUERDO */
+.left{
+  flex:1;padding:48px 40px;
+  background:linear-gradient(135deg,#0d1117 0%,#0a1628 100%);
+  border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.left::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(47,129,247,0.08) 0%,transparent 60%);
+}
+.brand{position:relative;z-index:1;margin-bottom:auto}
+.brand-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(47,129,247,0.3);
+}
+.brand-name{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.brand-desc{font-size:13px;color:var(--txt2);line-height:1.6;max-width:260px}
+.stats{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;gap:12px;
+  margin-top:40px;
+}
+.stat{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--b1);
+  border-radius:10px;padding:12px 14px;
+}
+.stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stat-dot.blue{background:var(--acc)}
+.stat-dot.green{background:var(--ok)}
+.stat-dot.purple{background:#bc8cff}
+.stat-txt{font-size:12px;color:var(--txt2)}
+.stat-val{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-left:auto;color:var(--txt)}
+
+/* PAINEL DIREITO */
+.right{width:420px;padding:48px 40px;display:flex;flex-direction:column}
+
+/* ABAS */
+.tabs{display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:4px;margin-bottom:32px}
+.tab{
+  flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;
+  border-radius:7px;cursor:pointer;transition:all 0.2s;color:var(--txt2);border:none;background:none;
+  font-family:'Inter',sans-serif;
+}
+.tab.active{background:var(--s3);color:var(--txt);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+
+/* FORMULÁRIOS */
+.form{display:none;flex-direction:column;flex:1}
+.form.active{display:flex}
+.form-title{font-size:18px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px}
+.form-sub{font-size:12px;color:var(--txt2);margin-bottom:28px;line-height:1.5}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase}
+.field input{
+  width:100%;padding:11px 14px;
+  background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:13px;outline:none;
+  transition:all 0.2s;
+}
+.field input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,129,247,0.12)}
+.field input::placeholder{color:var(--txt3)}
+
+/* FORÇA DA SENHA */
+.pwd-strength{margin-top:6px;display:none}
+.pwd-bars{display:flex;gap:4px;margin-bottom:4px}
+.pwd-bar{flex:1;height:3px;background:var(--b1);border-radius:2px;transition:background 0.3s}
+.pwd-label{font-size:10px;color:var(--txt2)}
+
+/* BOTÃO */
+.btn{
+  width:100%;padding:12px;margin-top:8px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  border:none;border-radius:8px;color:#fff;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;
+  position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.btn:hover::before{opacity:1}
+.btn:active{transform:scale(0.99)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* ALERTAS */
+.alert{
+  border-radius:8px;padding:10px 14px;font-size:12px;
+  margin-bottom:14px;display:none;align-items:flex-start;gap:8px;line-height:1.4;
+}
+.alert.active{display:flex}
+.alert-err{background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.25);color:#ff8b8b}
+.alert-ok{background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.25);color:#7ee787}
+.alert-icon{flex-shrink:0;font-size:14px}
+
+/* SPINNER */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:rot 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--txt3);font-size:11px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* REGRAS SENHA */
+.pwd-rules{display:none;margin-top:8px;padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:8px}
+.pwd-rule{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2);margin-bottom:5px}
+.pwd-rule:last-child{margin-bottom:0}
+.pwd-rule .dot{width:6px;height:6px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:background 0.2s}
+.pwd-rule.ok .dot{background:var(--ok)}
+.pwd-rule.ok{color:var(--ok)}
+
+/* SUCCESS STATE */
+.success-state{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;text-align:center;gap:16px;padding:20px;
+}
+.success-state.active{display:flex}
+.success-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(63,185,80,0.15);border:2px solid rgba(63,185,80,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  animation:pop 0.5s ease;
+}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-title{font-size:16px;font-weight:700;color:var(--ok)}
+.success-desc{font-size:12px;color:var(--txt2);line-height:1.6;max-width:280px}
+.success-btn{
+  padding:10px 24px;background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;color:var(--txt);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;
+}
+.success-btn:hover{border-color:var(--acc);color:var(--acc)}
 </style>
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
-<div class="card">
-  <div class="logo">
-    <div class="logo-icon">📋</div>
-    <div>
-      <div class="logo-text">Sistema Laudo</div>
-      <div class="logo-sub">CONTROLE DE DEVOLUÇÕES</div>
+
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ESQUERDO -->
+  <div class="left">
+    <div class="brand">
+      <div class="brand-icon">📋</div>
+      <div class="brand-name">Sistema Laudo</div>
+      <div class="brand-desc">Plataforma de controle de devoluções e qualidade para todas as filiais.</div>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-dot blue"></div>
+        <div class="stat-txt">Registros sincronizados</div>
+        <div class="stat-val" id="statTotal">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-dot green"></div>
+        <div class="stat-txt">Status da conexão</div>
+        <div class="stat-val" id="statConn" style="color:var(--ok)">Online</div>
+      </div>
+      <div class="stat">
+        <div class="stat-dot purple"></div>
+        <div class="stat-txt">Banco de dados</div>
+        <div class="stat-val">Supabase</div>
+      </div>
     </div>
   </div>
-  <h1>Bem-vindo</h1>
-  <p class="subtitle">Acesse com suas credenciais para continuar</p>
-  <div class="error" id="erro"></div>
-  <div class="field">
-    <label>E-mail</label>
-    <input type="email" id="email" placeholder="seu@email.com">
+
+  <!-- DIREITO -->
+  <div class="right">
+
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="trocarAba('login')">Entrar</button>
+      <button class="tab" id="tab-cadastro" onclick="trocarAba('cadastro')">Cadastrar</button>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div class="form active" id="form-login">
+      <div class="form-title">Bem-vindo de volta</div>
+      <div class="form-sub">Entre com suas credenciais para acessar o dashboard.</div>
+
+      <div class="alert alert-err" id="err-login">
+        <span class="alert-icon">⚠</span>
+        <span id="err-login-msg"></span>
+      </div>
+
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="l-senha" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn" id="btn-login" onclick="login()">Entrar no sistema</button>
+    </div>
+
+    <!-- FORM CADASTRO -->
+    <div class="form" id="form-cadastro">
+      <div class="form-title">Criar conta</div>
+      <div class="form-sub">Cadastre um novo usuário. O acesso ficará disponível imediatamente.</div>
+
+      <div class="alert alert-err" id="err-cad">
+        <span class="alert-icon">⚠</span>
+        <span id="err-cad-msg"></span>
+      </div>
+
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="c-nome" placeholder="João da Silva" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="c-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="c-senha" placeholder="Mín. 8 caracteres" autocomplete="new-password" oninput="checarSenha(this.value)">
+        <div class="pwd-strength" id="pwd-strength">
+          <div class="pwd-bars">
+            <div class="pwd-bar" id="pb1"></div>
+            <div class="pwd-bar" id="pb2"></div>
+            <div class="pwd-bar" id="pb3"></div>
+            <div class="pwd-bar" id="pb4"></div>
+          </div>
+          <div class="pwd-label" id="pwd-label">Digite sua senha</div>
+        </div>
+        <div class="pwd-rules" id="pwd-rules">
+          <div class="pwd-rule" id="r-len"><div class="dot"></div>Mínimo 8 caracteres</div>
+          <div class="pwd-rule" id="r-num"><div class="dot"></div>Pelo menos 1 número</div>
+          <div class="pwd-rule" id="r-upp"><div class="dot"></div>Pelo menos 1 letra maiúscula</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirmar senha</label>
+        <input type="password" id="c-conf" placeholder="Repita a senha" autocomplete="new-password">
+      </div>
+
+      <button class="btn" id="btn-cad" onclick="cadastrar()">Criar conta</button>
+    </div>
+
+    <!-- SUCESSO CADASTRO -->
+    <div class="success-state" id="success-cad">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Conta criada!</div>
+      <div class="success-desc" id="success-desc">Usuário cadastrado com sucesso no Supabase. Agora você já pode fazer login.</div>
+      <button class="success-btn" onclick="trocarAba('login')">Ir para o login →</button>
+    </div>
+
   </div>
-  <div class="field">
-    <label>Senha</label>
-    <input type="password" id="senha" placeholder="••••••••">
-  </div>
-  <button class="btn" id="btnLogin">Entrar</button>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <script>
 var _client = supabase.createClient(
   'https://jsppfrdhkekkkjemkzju.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vra2tqZW1remp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTc2MDIsImV4cCI6MjA4OTE3MzYwMn0.okK6pdZdhIcj9L_sLvLsc-iVnU_irisJoF1dDlSMbGg'
 )
+
+// Verifica sessão
 _client.auth.getSession().then(function(r){
-  if(r.data && r.data.session) location.href='dashboard.html'
+  if(r.data&&r.data.session) location.href='dashboard.html'
 })
-document.getElementById('senha').onkeydown=function(e){if(e.key==='Enter')fazerLogin()}
-document.getElementById('btnLogin').onclick=fazerLogin
-function fazerLogin(){
-  var email=document.getElementById('email').value.trim()
-  var senha=document.getElementById('senha').value
-  var btn=document.getElementById('btnLogin')
-  var erro=document.getElementById('erro')
-  erro.style.display='none'
-  if(!email||!senha){erro.textContent='Preencha e-mail e senha.';erro.style.display='block';return}
+
+// Carrega total de registros
+_client.from('tbl_baselaudo').select('*',{count:'exact',head:true}).then(function(r){
+  if(r.count) document.getElementById('statTotal').textContent=r.count.toLocaleString('pt-BR')
+})
+
+// Enter no login
+document.getElementById('l-senha').onkeydown=function(e){if(e.key==='Enter')login()}
+
+// TROCAR ABA
+function trocarAba(aba){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
+  document.querySelectorAll('.form').forEach(function(f){f.classList.remove('active')})
+  document.getElementById('success-cad').classList.remove('active')
+  document.getElementById('tab-'+aba).classList.add('active')
+  document.getElementById('form-'+aba).classList.add('active')
+  ocultarErros()
+}
+
+function ocultarErros(){
+  document.getElementById('err-login').classList.remove('active')
+  document.getElementById('err-cad').classList.remove('active')
+}
+
+function mostrarErro(id,msg){
+  document.getElementById(id).classList.add('active')
+  document.getElementById(id+'-msg').textContent=msg
+}
+
+// LOGIN
+function login(){
+  var email=document.getElementById('l-email').value.trim()
+  var senha=document.getElementById('l-senha').value
+  var btn=document.getElementById('btn-login')
+  ocultarErros()
+
+  if(!email||!senha){mostrarErro('err-login','Preencha e-mail e senha.');return}
+
   btn.disabled=true
-  btn.innerHTML='<span class="spinner"></span>Entrando...'
+  btn.innerHTML='<span class="spin"></span>Entrando...'
+
   _client.auth.signInWithPassword({email:email,password:senha}).then(function(r){
     if(r.error){
-      erro.textContent='Erro: '+r.error.message
-      erro.style.display='block'
+      var msg=r.error.message
+      if(msg.includes('Invalid'))msg='E-mail ou senha incorretos.'
+      if(msg.includes('confirmed'))msg='E-mail não confirmado. Contate o administrador.'
+      mostrarErro('err-login',msg)
       btn.disabled=false
-      btn.innerHTML='Entrar'
-    }else{
+      btn.innerHTML='Entrar no sistema'
+    } else {
+      btn.innerHTML='<span class="spin"></span>Redirecionando...'
       location.href='dashboard.html'
+    }
+  })
+}
+
+// VERIFICAR FORÇA DA SENHA
+function checarSenha(v){
+  var s=document.getElementById('pwd-strength')
+  var r=document.getElementById('pwd-rules')
+  if(!v){s.style.display='none';r.style.display='none';return}
+  s.style.display='block';r.style.display='block'
+
+  var rLen=document.getElementById('r-len')
+  var rNum=document.getElementById('r-num')
+  var rUpp=document.getElementById('r-upp')
+
+  var hasLen=v.length>=8
+  var hasNum=/\d/.test(v)
+  var hasUpp=/[A-Z]/.test(v)
+
+  rLen.className='pwd-rule'+(hasLen?' ok':'')
+  rNum.className='pwd-rule'+(hasNum?' ok':'')
+  rUpp.className='pwd-rule'+(hasUpp?' ok':'')
+
+  var score=(hasLen?1:0)+(hasNum?1:0)+(hasUpp?1:0)+(v.length>=12?1:0)
+  var cores=['#f85149','#d29922','#2f81f7','#3fb950']
+  var labels=['Muito fraca','Fraca','Boa','Forte']
+  var bars=['pb1','pb2','pb3','pb4']
+
+  bars.forEach(function(b,i){
+    document.getElementById(b).style.background=i<score?cores[score-1]:'var(--b1)'
+  })
+  document.getElementById('pwd-label').textContent=labels[score-1]||'Digite sua senha'
+  document.getElementById('pwd-label').style.color=cores[score-1]||'var(--txt2)'
+}
+
+// CADASTRO
+function cadastrar(){
+  var nome=document.getElementById('c-nome').value.trim()
+  var email=document.getElementById('c-email').value.trim()
+  var senha=document.getElementById('c-senha').value
+  var conf=document.getElementById('c-conf').value
+  var btn=document.getElementById('btn-cad')
+  ocultarErros()
+
+  if(!nome){mostrarErro('err-cad','Preencha o nome completo.');return}
+  if(!email||!email.includes('@')){mostrarErro('err-cad','Informe um e-mail válido.');return}
+  if(senha.length<8){mostrarErro('err-cad','A senha precisa ter ao menos 8 caracteres.');return}
+  if(senha!==conf){mostrarErro('err-cad','As senhas não coincidem.');return}
+
+  btn.disabled=true
+  btn.innerHTML='<span class="spin"></span>Criando conta...'
+
+  _client.auth.signUp({
+    email:email,
+    password:senha,
+    options:{data:{full_name:nome}}
+  }).then(function(r){
+    if(r.error){
+      var msg=r.error.message
+      if(msg.includes('already'))msg='Este e-mail já está cadastrado.'
+      if(msg.includes('weak'))msg='Senha muito fraca. Use letras, números e maiúsculas.'
+      mostrarErro('err-cad',msg)
+      btn.disabled=false
+      btn.innerHTML='Criar conta'
+    } else {
+      document.getElementById('form-cadastro').classList.remove('active')
+      document.getElementById('success-cad').classList.add('active')
+      document.getElementById('success-desc').textContent=
+        'Usuário "'+nome+'" cadastrado com sucesso. Use o e-mail '+email+' para fazer login.'
+      btn.disabled=false
+      btn.innerHTML='Criar conta'
     }
   })
 }
