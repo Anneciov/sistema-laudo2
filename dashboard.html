@@ -69,6 +69,7 @@ select:focus{border-color:var(--acc)}
 .mc-sub{font-size:11px;color:var(--txt3);margin-top:6px}
 .mc-icon{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.3}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 .cc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:18px 20px}
 .cc.wide{grid-column:span 2}
 .cc-title{font-size:13px;font-weight:600;margin-bottom:2px}
@@ -398,14 +399,44 @@ function graficos(){
   var sm={}
   filtrado.forEach(function(r){var s=r.Andamento||'N/D';sm[s]=(sm[s]||0)+1})
   donut('cStatus',sm,['#2f81f7','#d29922','#3fb950','#bc8cff','#f85149','#484f58'])
+
   var cm={}
   filtrado.forEach(function(r){var c=r.Causa_Raiz||'Não informado';cm[c]=(cm[c]||0)+1})
   var top=Object.entries(cm).sort(function(a,b){return b[1]-a[1]}).slice(0,7)
   barra('cCausa',Object.fromEntries(top),'#bc8cff')
-  var fm={}
-  filtrado.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
-  var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-  barra('cFilial',Object.fromEntries(sf),'#3dc9b0')
+
+  // 🔥 NOVO: SLA MÉDIO POR FILIAL
+  var slaFilial={}
+
+  filtrado.forEach(function(r){
+    if(parecerExcluido(r)) return
+
+    var sla=calcSLA(r)
+    if(sla===null) return
+
+    var f='F'+(r.Filial||'?')
+
+    if(!slaFilial[f]){
+      slaFilial[f]={total:0,qtd:0}
+    }
+
+    slaFilial[f].total+=sla
+    slaFilial[f].qtd+=1
+  })
+
+  var mediaFilial={}
+  Object.keys(slaFilial).forEach(function(f){
+    var obj=slaFilial[f]
+    if(obj.qtd>0){
+      mediaFilial[f]=(obj.total/obj.qtd).toFixed(1)
+    }
+  })
+
+  var ordenado=Object.entries(mediaFilial)
+    .sort(function(a,b){return b[1]-a[1]})
+    .slice(0,15)
+
+  barraSLA('cFilial',Object.fromEntries(ordenado),'#3dc9b0')
 }
 
 function donut(id,data,colors){
@@ -428,7 +459,57 @@ function barra(id,data,cor){
         y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}}
       }}})
 }
+function barraSLA(id,data,cor){
+  if(charts[id])charts[id].destroy()
+  var ctx=document.getElementById(id);if(!ctx)return
 
+  charts[id]=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:Object.keys(data),
+      datasets:[{
+        label:'SLA Médio (dias)',
+        data:Object.values(data),
+        backgroundColor:cor+'44',
+        borderColor:cor,
+        borderWidth:1,
+        borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false}, // ❌ remove hover
+        datalabels:{
+          color:'#3dc9b0',
+          anchor:'end',
+          align:'top',
+          formatter:function(v){return v+'d'},
+          font:{weight:'bold',size:10}
+        }
+      },
+      scales:{
+        x:{
+          ticks:{color:'#8b949e',font:{size:10}},
+          grid:{color:'#21262d'}
+        },
+        y:{
+          ticks:{color:'#8b949e',font:{size:10}},
+          grid:{color:'#21262d'},
+          beginAtZero:true,
+          title:{
+            display:true,
+            text:'Dias',
+            color:'#8b949e'
+          }
+        }
+      }
+    },
+    plugins:[ChartDataLabels]
+  })
+}
 // ── TABELAS ───────────────────────────────────
 function tabela(tipo){
   var isPend=tipo==='pend'
