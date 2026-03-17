@@ -424,18 +424,18 @@ function graficos(){
           display:true,
           color:'#3dc9b0',
           anchor:'end',align:'top',
-          font:{size:15,weight:'600'},
+          font:{size:10,weight:'600'},
           formatter:function(v){return v+'d'}
         }
       },
       layout:{padding:{top:20}},
       scales:{
-        x:{ticks:{color:'#8b949e',font:{size:13}},grid:{color:'#21262d'},border:{color:'#21262d'}},
+        x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},
         y:{
-          ticks:{color:'#8b949e',font:{size:13},callback:function(v){return v+'d'}},
+          ticks:{color:'#8b949e',font:{size:10},callback:function(v){return v+'d'}},
           grid:{color:'#21262d'},border:{color:'#21262d'},
           beginAtZero:true,
-          title:{display:true,text:'SLA Médio (dias)',color:'#484f58',font:{size:13}}
+          title:{display:true,text:'SLA Médio (dias)',color:'#484f58',font:{size:10}}
         }
       }
     }
@@ -449,7 +449,7 @@ function donut(id,data,colors){
     data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
       plugins:{
-        legend:{position:'right',labels:{color:'#8b949e',font:{size:15,family:'Inter'},padding:10,boxWidth:10}},
+        legend:{position:'right',labels:{color:'#8b949e',font:{size:11,family:'Inter'},padding:10,boxWidth:10}},
         datalabels:{
           display:true,color:'#fff',font:{size:10,weight:'700'},
           formatter:function(v,ctx){
