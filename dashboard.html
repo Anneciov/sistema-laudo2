@@ -377,7 +377,7 @@ function slaHtml(r){
 function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
- // var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
+  var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
 
   // SLA médio de TODOS os registros, excluindo os pareceres bloqueados
   var slasTodos=filtrado
