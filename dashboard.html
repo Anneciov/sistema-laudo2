@@ -46,8 +46,8 @@ select:focus{border-color:var(--acc)}
 .btn-green{background:rgba(63,185,80,0.1);border-color:rgba(63,185,80,0.3);color:var(--ok)}
 .btn-green:hover{background:rgba(63,185,80,0.2)}
 .btn-fil{padding:4px 12px;border-radius:6px;border:1px solid var(--b1);background:none;color:var(--txt2);font-size:11px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
-.btn-fil:hover{border-color:var(--acc2);color:var(--acc2)}
-.btn-fil.active{background:rgba(61,201,176,0.15);border-color:rgba(61,201,176,0.4);color:var(--acc2)}
+.btn-fil:hover{border-color:var(--warn);color:var(--warn)}
+.btn-fil.active{background:rgba(210,153,34,0.15);border-color:rgba(210,153,34,0.4);color:var(--warn)}
 .content{padding:20px 28px 28px;flex:1}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 @media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}}
@@ -182,12 +182,11 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
         <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
         <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
 
-        <!-- VOLUME POR FILIAL COM BOTÕES -->
         <div class="cc wide">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
             <div>
               <div class="cc-title">Volume por Filial</div>
-              <div class="cc-sub" style="margin-bottom:0" id="subFilial">Todos os registros por unidade</div>
+              <div class="cc-sub" style="margin-bottom:0" id="subFilial">Todos os registros por unidade · excl. aguardando/análise</div>
             </div>
             <div style="display:flex;gap:6px">
               <button class="btn-fil active" id="bf-total" onclick="mudarFilial('total')">Todos</button>
@@ -241,6 +240,7 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
         </div>
       </div>
     </div>
+
   </div>
 </main>
 
@@ -268,6 +268,7 @@ var _sb = supabase.createClient(
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}, modoFilial='total'
 
+// Pareceres excluídos do SLA médio E do gráfico Volume por Filial
 var PARECER_EXCLUIDOS=[
   'aguardando retorno de evidencia transportador',
   'aguardando retorno de evidencia transportadora',
@@ -338,20 +339,31 @@ function mudarFilial(modo){
   modoFilial=modo
   document.querySelectorAll('.btn-fil').forEach(function(b){b.classList.remove('active')})
   document.getElementById('bf-'+modo).classList.add('active')
-  var subs={total:'Todos os registros por unidade',pend:'Registros pendentes por unidade',conc:'Registros concluídos por unidade'}
+  var subs={
+    total:'Todos os registros por unidade · excl. aguardando/análise',
+    pend: 'Registros pendentes por unidade · excl. aguardando/análise',
+    conc: 'Registros concluídos por unidade · excl. aguardando/análise'
+  }
   document.getElementById('subFilial').textContent=subs[modo]
   desenharFilial()
 }
 
 function desenharFilial(){
+  // 1. Filtrar por modo (todos/pend/conc)
   var base
   if(modoFilial==='pend') base=filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
   else if(modoFilial==='conc') base=filtrado.filter(function(r){return r.Andamento==='Concluído'})
   else base=filtrado
+
+  // 2. Excluir registros com pareceres "aguardando" e "em análise"
+  base=base.filter(function(r){return !parecerExcluido(r)})
+
   var fm={}
   base.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-  barraComLabels('cFilial',Object.fromEntries(sf),'#3dc9b0')
+
+  // 3. Cor amarela (#d29922)
+  barraComLabels('cFilial',Object.fromEntries(sf),'#d29922')
 }
 
 // ── SLA ───────────────────────────────────────
@@ -409,21 +421,19 @@ function metricas(){
 
 // ── GRÁFICOS ──────────────────────────────────
 function graficos(){
-  // Donut status
   var sm={}
   filtrado.forEach(function(r){var s=r.Andamento||'N/D';sm[s]=(sm[s]||0)+1})
   donut('cStatus',sm,['#2f81f7','#d29922','#3fb950','#bc8cff','#f85149','#484f58'])
 
-  // Causa raiz
   var cm={}
   filtrado.forEach(function(r){var c=r.Causa_Raiz||'Não informado';cm[c]=(cm[c]||0)+1})
   var top=Object.entries(cm).sort(function(a,b){return b[1]-a[1]}).slice(0,7)
   barraComLabels('cCausa',Object.fromEntries(top),'#bc8cff')
 
-  // Volume por filial (usa modoFilial atual)
+  // Volume por filial (usa modoFilial + exclusão de pareceres)
   desenharFilial()
 
-  // SLA médio por filial — UMA barra, média geral
+  // SLA médio por filial — UMA barra, média geral, excl. pareceres
   var slaMap={}
   filtrado.forEach(function(r){
     if(parecerExcluido(r)) return
@@ -655,3 +665,4 @@ function ir(nome,el){
 </script>
 </body>
 </html>
+  
