@@ -118,6 +118,9 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 .empty{text-align:center;padding:48px;color:var(--txt2);font-size:13px}
 .mini-spin{display:inline-block;width:14px;height:14px;border:1px solid var(--b1);border-top-color:var(--acc);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+  .btn-fil{padding:4px 12px;border-radius:6px;border:1px solid var(--b1);background:none;color:var(--txt2);font-size:11px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-fil:hover{border-color:var(--acc);color:var(--acc)}
+.btn-fil.active{background:rgba(61,201,176,0.15);border-color:rgba(61,201,176,0.4);color:var(--acc2)}
 </style>
 </head>
 <body>
@@ -178,7 +181,21 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       <div class="charts">
         <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
         <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
-        <div class="cc wide"><div class="cc-title">Volume por Filial</div><div class="cc-sub">Quantidade de registros por unidade</div><div class="cc-wrap tall"><canvas id="cFilial"></canvas></div></div>
+        <!-- DEPOIS -->
+<div class="cc wide">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div class="cc-title">Volume por Filial</div>
+      <div class="cc-sub" style="margin-bottom:0">Quantidade de registros por unidade</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-fil active" id="bf-total" onclick="mudarFilial('total')">Todos</button>
+      <button class="btn-fil" id="bf-pend" onclick="mudarFilial('pend')">Pendentes</button>
+      <button class="btn-fil" id="bf-conc" onclick="mudarFilial('conc')">Concluídos</button>
+    </div>
+  </div>
+  <div class="cc-wrap tall" style="margin-top:12px"><canvas id="cFilial"></canvas></div>
+</div>
         <div class="cc wide"><div class="cc-title">SLA Médio por Filial</div><div class="cc-sub">Média geral de dias por filial · excl. aguardando/análise</div><div class="cc-wrap xtall"><canvas id="cSlaFilial"></canvas></div></div>
       </div>
     </div>
@@ -249,6 +266,13 @@ var _sb = supabase.createClient(
 )
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}
+  var modoFilial='total'
+function mudarFilial(modo){
+  modoFilial=modo
+  document.querySelectorAll('.btn-fil').forEach(function(b){b.classList.remove('active')})
+  document.getElementById('bf-'+modo).classList.add('active')
+  desenharFilial()
+}
 
 var PARECER_EXCLUIDOS=[
   'aguardando retorno de evidencia transportador',
@@ -367,6 +391,20 @@ function metricas(){
 }
 
 function graficos(){
+  function desenharFilial(){
+  var base=modoFilial==='pend'
+    ? filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
+    : modoFilial==='conc'
+      ? filtrado.filter(function(r){return r.Andamento==='Concluído'})
+      : filtrado
+
+  var fm={}
+  base.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
+  var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
+  barraComLabels('cFilial',Object.fromEntries(sf),'#3dc9b0')
+}
+  // Volume por filial — chama função separada
+desenharFilial()
   // Donut status
   var sm={}
   filtrado.forEach(function(r){var s=r.Andamento||'N/D';sm[s]=(sm[s]||0)+1})
