@@ -270,6 +270,7 @@ var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}, modoFilial='to
 
 // Pareceres excluídos do SLA médio E do gráfico Volume por Filial
 var PARECER_EXCLUIDOS=[
+  '',  // vazio
   'aguardando retorno de evidencia transportador',
   'aguardando retorno de evidencia transportadora',
   'aguardando retorno de estabilidade',
@@ -280,6 +281,7 @@ var PARECER_EXCLUIDOS=[
 function parecerExcluido(r){
   var p=(r.Parecer_da_Qualidade||'').toLowerCase().trim()
   p=p.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  if(p==='') return true  // ← exclui vazios e nulos
   return PARECER_EXCLUIDOS.some(function(ex){
     var n=ex.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     return p===n||p.indexOf(n)>-1
