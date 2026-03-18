@@ -197,7 +197,11 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
           <div class="cc-wrap tall" style="margin-top:12px"><canvas id="cFilial"></canvas></div>
         </div>
 
-        <div class="cc wide"><div class="cc-title">SLA Médio por Filial</div><div class="cc-sub">Média geral de dias por filial · excl. aguardando/análise</div><div class="cc-wrap xtall"><canvas id="cSlaFilial"></canvas></div></div>
+        <div class="cc wide">
+          <div class="cc-title">SLA Médio por Filial</div>
+          <div class="cc-sub">Média geral de dias por filial · excl. aguardando/análise/vazio</div>
+          <div class="cc-wrap xtall"><canvas id="cSlaFilial"></canvas></div>
+        </div>
       </div>
     </div>
 
@@ -268,9 +272,8 @@ var _sb = supabase.createClient(
 
 var todos=[], filtrado=[], pgPend=0, pgTodos=0, PG=25, charts={}, modoFilial='total'
 
-// Pareceres excluídos do SLA médio E do gráfico Volume por Filial
-var PARECER_EXCLUIDOS=[
-  '',  // vazio
+// Pareceres que excluem do gráfico Volume por Filial (NÃO inclui vazio — pendentes não têm parecer ainda)
+var PARECER_EXCLUIDOS_VOLUME=[
   'aguardando retorno de evidencia transportador',
   'aguardando retorno de evidencia transportadora',
   'aguardando retorno de estabilidade',
@@ -278,13 +281,34 @@ var PARECER_EXCLUIDOS=[
   'em analise qualidade'
 ]
 
-function parecerExcluido(r){
-  var p=(r.Parecer_da_Qualidade||'').toLowerCase().trim()
-  p=p.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  if(p==='') return true  // ← exclui vazios e nulos
-  return PARECER_EXCLUIDOS.some(function(ex){
-    var n=ex.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+// Pareceres que excluem do SLA médio (inclui vazio — sem parecer não conta no SLA)
+var PARECER_EXCLUIDOS_SLA=[
+  '',
+  'aguardando retorno de evidencia transportador',
+  'aguardando retorno de evidencia transportadora',
+  'aguardando retorno de estabilidade',
+  'em analise',
+  'em analise qualidade'
+]
+
+function normalizar(s){
+  return (s||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+}
+
+function parecerExcluidoVolume(r){
+  var p=normalizar(r.Parecer_da_Qualidade)
+  return PARECER_EXCLUIDOS_VOLUME.some(function(ex){
+    var n=normalizar(ex)
     return p===n||p.indexOf(n)>-1
+  })
+}
+
+function parecerExcluidoSLA(r){
+  var p=normalizar(r.Parecer_da_Qualidade)
+  if(p==='') return true  // vazio exclui do SLA
+  return PARECER_EXCLUIDOS_SLA.some(function(ex){
+    var n=normalizar(ex)
+    return n!==''&&(p===n||p.indexOf(n)>-1)
   })
 }
 
@@ -351,20 +375,17 @@ function mudarFilial(modo){
 }
 
 function desenharFilial(){
-  // 1. Filtrar por modo (todos/pend/conc)
   var base
   if(modoFilial==='pend') base=filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
   else if(modoFilial==='conc') base=filtrado.filter(function(r){return r.Andamento==='Concluído'})
   else base=filtrado
 
-  // 2. Excluir registros com pareceres "aguardando" e "em análise"
-  base=base.filter(function(r){return !parecerExcluido(r)})
+  // Exclui só os pareceres de aguardando/análise — vazio NÃO é excluído aqui
+  base=base.filter(function(r){return !parecerExcluidoVolume(r)})
 
   var fm={}
   base.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-
-  // 3. Cor amarela (#d29922)
   barraComLabels('cFilial',Object.fromEntries(sf),'#d29922')
 }
 
@@ -410,8 +431,9 @@ function metricas(){
   var n=filtrado.length
   var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
   var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
+  // SLA médio exclui vazio + aguardando/análise
   var slasTodos=filtrado
-    .filter(function(r){return !parecerExcluido(r)})
+    .filter(function(r){return !parecerExcluidoSLA(r)})
     .map(function(r){return calcSLA(r)})
     .filter(function(v){return v!==null})
   var media=slasTodos.length?Math.round(slasTodos.reduce(function(a,b){return a+b},0)/slasTodos.length):0
@@ -432,13 +454,12 @@ function graficos(){
   var top=Object.entries(cm).sort(function(a,b){return b[1]-a[1]}).slice(0,7)
   barraComLabels('cCausa',Object.fromEntries(top),'#bc8cff')
 
-  // Volume por filial (usa modoFilial + exclusão de pareceres)
   desenharFilial()
 
-  // SLA médio por filial — UMA barra, média geral, excl. pareceres
+  // SLA médio por filial — exclui vazio + aguardando/análise
   var slaMap={}
   filtrado.forEach(function(r){
-    if(parecerExcluido(r)) return
+    if(parecerExcluidoSLA(r)) return
     var sla=calcSLA(r)
     if(sla===null) return
     var f='F'+(r.Filial||'?')
@@ -628,7 +649,7 @@ function abrir(r){
   var slaCalc=calcSLA(r)
   var and=(r.Andamento||'').trim()
   var slaTexto=slaCalc!==null?slaCalc+'d ('+(and==='Concluído'?'encerrado — retorno menos envio':'em aberto — envio até hoje')+')':'—'
-  var excl=parecerExcluido(r)?'⚠ excluído do SLA médio':''
+  var excl=parecerExcluidoSLA(r)?'⚠ excluído do SLA médio':''
   document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
   document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)+(excl?' · '+excl:'')
   var campos=[
@@ -667,4 +688,3 @@ function ir(nome,el){
 </script>
 </body>
 </html>
-  
