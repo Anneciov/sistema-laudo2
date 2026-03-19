@@ -613,11 +613,22 @@ function donut(id,data){
   var ctx = document.getElementById(id)
   if(!ctx) return
 
-  // 🎨 Paleta fixa (4 cores)
-  const palette = ['#2ecc71', '#3498db', '#00ffff', '#f1c40f']
+  // 🎨 Paleta fallback
+  const palette = ['#3498db', '#00ffff']
 
-  // Aplica cores em sequência
-  const cores = Object.keys(data).map((_, i) => palette[i % palette.length])
+  let idx = 0
+
+  const cores = Object.keys(data).map(k => {
+    const key = k.toLowerCase()
+
+    if(key.includes('conclu')) return '#1e8449' // 🟢 verde escuro
+    if(key.includes('pend')) return '#b7950b'   // 🟡 amarelo escuro
+
+    // fallback
+    const cor = palette[idx % palette.length]
+    idx++
+    return cor
+  })
 
   charts[id] = new Chart(ctx,{
     type:'doughnut',
@@ -658,7 +669,6 @@ function donut(id,data){
     }
   })
 }
-
 
   function barraComLabels(id,data){
   if(charts[id]) charts[id].destroy()
