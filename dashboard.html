@@ -624,7 +624,7 @@ function barraComLabels(id,data,cor){
   charts[id]=new Chart(ctx,{type:'bar',
     data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:cor+'55',borderColor:cor,borderWidth:1,borderRadius:4,borderSkipped:false}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},datalabels:{display:true,color:cor,anchor:'end',align:'top',font:{size:10,weight:'600'},formatter:function(v){return v}}},
+      plugins:{legend:{display:false},datalabels:{display:true,color:cor,anchor:'end',align:'top',font:{size:15,weight:'600'},formatter:function(v){return v}}},
       layout:{padding:{top:18}},
       scales:{x:{ticks:{color:'#8b949e',font:{size:15}},grid:{color:'#21262d'},border:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:15}},grid:{color:'#21262d'},border:{color:'#21262d'}}}
     }})
