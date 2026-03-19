@@ -3,814 +3,454 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Sistema Laudo</title>
+<title>Sistema Laudo — Acesso</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
-:root{--bg:#060910;--s1:#0d1117;--s2:#161b22;--s3:#21262d;--b1:#30363d;--b2:#484f58;--acc:#2f81f7;--acc2:#3dc9b0;--txt:#e6edf3;--txt2:#8b949e;--txt3:#484f58;--warn:#d29922;--err:#f85149;--ok:#3fb950;--pur:#bc8cff;--r:10px;--r2:14px}
+:root{
+  --bg:#060910;--s1:#0d1117;--s2:#161b22;--s3:#21262d;
+  --b1:#30363d;--b2:#484f58;
+  --acc:#2f81f7;--acc2:#3dc9b0;
+  --txt:#e6edf3;--txt2:#8b949e;--txt3:#484f58;
+  --err:#f85149;--ok:#3fb950;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--s1)}
-::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;z-index:100}
-.sb-logo{display:flex;align-items:center;gap:12px;padding:20px 20px 18px;border-bottom:1px solid var(--b1)}
-.sb-logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.sb-logo-name{font-size:14px;font-weight:600;letter-spacing:-0.3px}
-.sb-logo-sub{font-size:10px;color:var(--txt2);font-family:'JetBrains Mono',monospace;letter-spacing:1px}
-.sb-nav{padding:12px 10px;flex:1;overflow-y:auto}
-.sb-sec{font-size:10px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;padding:10px 10px 6px;font-weight:600}
-.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:var(--r);border:none;background:none;color:var(--txt2);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;text-align:left;margin-bottom:2px}
-.nav-btn:hover{background:var(--s2);color:var(--txt)}
-.nav-btn.active{background:rgba(47,129,247,0.15);color:var(--acc);border:1px solid rgba(47,129,247,0.2)}
-.nav-btn .icon{width:18px;text-align:center;font-size:14px}
-.sb-footer{padding:12px;border-top:1px solid var(--b1)}
-.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r);background:var(--s2);border:1px solid var(--b1);margin-bottom:8px}
-.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--pur));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff}
-.user-name{font-size:12px;font-weight:600}
-.user-email{font-size:11px;color:var(--txt2)}
-.btn-logout{width:100%;padding:8px;background:none;border:1px solid var(--b1);border-radius:var(--r);color:var(--txt2);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
-.btn-logout:hover{border-color:var(--err);color:var(--err);background:rgba(248,81,73,0.08)}
-.main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;flex-wrap:wrap;gap:12px}
-.page-title{font-size:20px;font-weight:700;letter-spacing:-0.5px}
-.page-sub{font-size:12px;color:var(--txt2);margin-top:2px}
-.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-select{padding:7px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;outline:none;transition:border-color 0.15s}
-select:focus{border-color:var(--acc)}
-.btn-act{padding:7px 14px;border-radius:var(--r);border:1px solid;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:5px}
-.btn-blue{background:rgba(47,129,247,0.1);border-color:rgba(47,129,247,0.3);color:var(--acc)}
-.btn-blue:hover{background:rgba(47,129,247,0.2)}
-.btn-green{background:rgba(63,185,80,0.1);border-color:rgba(63,185,80,0.3);color:var(--ok)}
-.btn-green:hover{background:rgba(63,185,80,0.2)}
-.btn-warn{background:rgba(210,153,34,0.1);border-color:rgba(210,153,34,0.3);color:var(--warn)}
-.btn-warn:hover{background:rgba(210,153,34,0.2)}
-.btn-pur{background:rgba(188,140,255,0.1);border-color:rgba(188,140,255,0.3);color:var(--pur)}
-.btn-pur:hover{background:rgba(188,140,255,0.2)}
-.btn-fil{padding:4px 12px;border-radius:6px;border:1px solid var(--b1);background:none;color:var(--txt2);font-size:11px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
-.btn-fil:hover{border-color:var(--warn);color:var(--warn)}
-.btn-fil.active{background:rgba(210,153,34,0.15);border-color:rgba(210,153,34,0.4);color:var(--warn)}
-.content{padding:20px 28px 28px;flex:1}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-@media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.metrics{grid-template-columns:1fr}}
-.mc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
-.mc:hover{border-color:var(--b2)}
-.mc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;opacity:0.6}
-.mc.blue::after{background:linear-gradient(90deg,var(--acc),var(--acc2))}
-.mc.yellow::after{background:linear-gradient(90deg,var(--warn),#fb923c)}
-.mc.green::after{background:linear-gradient(90deg,var(--ok),#34d399)}
-.mc.purple::after{background:linear-gradient(90deg,var(--pur),#a78bfa)}
-.mc-label{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:12px}
-.mc-val{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-1px}
-.mc-val.blue{color:var(--acc)}
-.mc-val.yellow{color:var(--warn)}
-.mc-val.green{color:var(--ok)}
-.mc-val.purple{color:var(--pur)}
-.mc-sub{font-size:11px;color:var(--txt3);margin-top:6px}
-.mc-icon{position:absolute;top:16px;right:16px;font-size:20px;opacity:0.3}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-@media(max-width:900px){.charts{grid-template-columns:1fr}}
-.cc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:18px 20px}
-.cc.wide{grid-column:span 2}
-@media(max-width:900px){.cc.wide{grid-column:span 1}}
-.cc-title{font-size:13px;font-weight:600;margin-bottom:2px}
-.cc-sub{font-size:11px;color:var(--txt2);margin-bottom:10px}
-.cc-wrap{position:relative;height:220px}
-.cc-wrap.tall{height:280px}
-.cc-wrap.xtall{height:340px}
-.tc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:16px}
-.tc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1);gap:10px;flex-wrap:wrap}
-.tc-title{font-size:13px;font-weight:600}
-.tc-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-/* Badge de filtro ativo */
-.filtro-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
-.filtro-badge.dev{background:rgba(210,153,34,0.15);color:var(--warn);border:1px solid rgba(210,153,34,0.3)}
-.filtro-badge.qual{background:rgba(188,140,255,0.15);color:var(--pur);border:1px solid rgba(188,140,255,0.3)}
-.search{padding:6px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:12px;font-family:'Inter',sans-serif;width:200px;outline:none;transition:border-color 0.15s}
-.search:focus{border-color:var(--acc)}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.8px;padding:10px 18px;border-bottom:1px solid var(--b1);background:var(--s2);white-space:nowrap}
-td{padding:11px 18px;font-size:12px;border-bottom:1px solid rgba(48,54,61,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
-.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2)}
-.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;display:inline-block}
-.b-pend{background:rgba(210,153,34,0.15);color:var(--warn);border:1px solid rgba(210,153,34,0.2)}
-.b-ok{background:rgba(63,185,80,0.15);color:var(--ok);border:1px solid rgba(63,185,80,0.2)}
-.b-blue{background:rgba(47,129,247,0.15);color:var(--acc);border:1px solid rgba(47,129,247,0.2)}
-.b-nd{background:rgba(72,79,88,0.3);color:var(--txt2);border:1px solid var(--b1)}
-.sla-ok{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)}
-.sla-warn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--warn)}
-.sla-danger{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--err)}
-.sla-closed{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt2)}
-.pag{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--b1);font-size:11px;color:var(--txt2);flex-wrap:wrap;gap:8px}
-.pag-btns{display:flex;gap:6px}
-.pb{padding:4px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;color:var(--txt);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
-.pb:hover{border-color:var(--acc);color:var(--acc)}
-.pb:disabled{opacity:0.3;cursor:not-allowed}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.overlay.open{display:flex}
-.modal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;width:720px;max-width:95vw;max-height:88vh;overflow-y:auto;padding:26px;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
-.modal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
-.modal-title{font-size:15px;font-weight:700}
-.modal-sub{font-size:11px;color:var(--txt2);margin-top:4px;font-family:'JetBrains Mono',monospace}
-.modal-x{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px;transition:color 0.15s}
-.modal-x:hover{color:var(--txt)}
-.dg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:600px){.dg{grid-template-columns:1fr}}
-.di{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px}
-.dl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:5px}
-.dv{font-size:12px;font-weight:500;color:var(--txt)}
-.section{display:none}
-.section.active{display:block}
-.empty{text-align:center;padding:48px;color:var(--txt2);font-size:13px}
-.mini-spin{display:inline-block;width:14px;height:14px;border:2px solid var(--b1);border-top-color:var(--acc);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
+body{
+  font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* BACKGROUND ANIMADO */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(47,129,247,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(47,129,247,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:float 8s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:rgba(47,129,247,0.08);top:-150px;left:-100px;animation-delay:0s}
+.orb2{width:400px;height:400px;background:rgba(61,201,176,0.06);bottom:-100px;right:-80px;animation-delay:3s}
+.orb3{width:300px;height:300px;background:rgba(188,140,255,0.05);top:40%;left:40%;animation-delay:5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+/* LAYOUT */
+.wrap{
+  position:relative;z-index:1;
+  display:flex;align-items:stretch;
+  width:900px;max-width:95vw;
+  background:var(--s1);
+  border:1px solid var(--b1);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.7);
+  min-height:560px;
+}
+
+/* PAINEL ESQUERDO */
+.left{
+  flex:1;padding:48px 40px;
+  background:linear-gradient(135deg,#0d1117 0%,#0a1628 100%);
+  border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.left::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(47,129,247,0.08) 0%,transparent 60%);
+}
+.brand{position:relative;z-index:1;margin-bottom:auto}
+.brand-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(47,129,247,0.3);
+}
+.brand-name{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.brand-desc{font-size:13px;color:var(--txt2);line-height:1.6;max-width:260px}
+.stats{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;gap:12px;
+  margin-top:40px;
+}
+.stat{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--b1);
+  border-radius:10px;padding:12px 14px;
+}
+.stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stat-dot.blue{background:var(--acc)}
+.stat-dot.green{background:var(--ok)}
+.stat-dot.purple{background:#bc8cff}
+.stat-txt{font-size:12px;color:var(--txt2)}
+.stat-val{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-left:auto;color:var(--txt)}
+
+/* PAINEL DIREITO */
+.right{width:420px;padding:48px 40px;display:flex;flex-direction:column}
+
+/* ABAS */
+.tabs{display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:4px;margin-bottom:32px}
+.tab{
+  flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;
+  border-radius:7px;cursor:pointer;transition:all 0.2s;color:var(--txt2);border:none;background:none;
+  font-family:'Inter',sans-serif;
+}
+.tab.active{background:var(--s3);color:var(--txt);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+
+/* FORMULÁRIOS */
+.form{display:none;flex-direction:column;flex:1}
+.form.active{display:flex}
+.form-title{font-size:18px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px}
+.form-sub{font-size:12px;color:var(--txt2);margin-bottom:28px;line-height:1.5}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase}
+.field input{
+  width:100%;padding:11px 14px;
+  background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:13px;outline:none;
+  transition:all 0.2s;
+}
+.field input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,129,247,0.12)}
+.field input::placeholder{color:var(--txt3)}
+
+/* FORÇA DA SENHA */
+.pwd-strength{margin-top:6px;display:none}
+.pwd-bars{display:flex;gap:4px;margin-bottom:4px}
+.pwd-bar{flex:1;height:3px;background:var(--b1);border-radius:2px;transition:background 0.3s}
+.pwd-label{font-size:10px;color:var(--txt2)}
+
+/* BOTÃO */
+.btn{
+  width:100%;padding:12px;margin-top:8px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  border:none;border-radius:8px;color:#fff;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;
+  position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.btn:hover::before{opacity:1}
+.btn:active{transform:scale(0.99)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* ALERTAS */
+.alert{
+  border-radius:8px;padding:10px 14px;font-size:12px;
+  margin-bottom:14px;display:none;align-items:flex-start;gap:8px;line-height:1.4;
+}
+.alert.active{display:flex}
+.alert-err{background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.25);color:#ff8b8b}
+.alert-ok{background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.25);color:#7ee787}
+.alert-icon{flex-shrink:0;font-size:14px}
+
+/* SPINNER */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:rot 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--txt3);font-size:11px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* REGRAS SENHA */
+.pwd-rules{display:none;margin-top:8px;padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:8px}
+.pwd-rule{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2);margin-bottom:5px}
+.pwd-rule:last-child{margin-bottom:0}
+.pwd-rule .dot{width:6px;height:6px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:background 0.2s}
+.pwd-rule.ok .dot{background:var(--ok)}
+.pwd-rule.ok{color:var(--ok)}
+
+/* SUCCESS STATE */
+.success-state{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;text-align:center;gap:16px;padding:20px;
+}
+.success-state.active{display:flex}
+.success-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(63,185,80,0.15);border:2px solid rgba(63,185,80,0.3);
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  animation:pop 0.5s ease;
+}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-title{font-size:16px;font-weight:700;color:var(--ok)}
+.success-desc{font-size:12px;color:var(--txt2);line-height:1.6;max-width:280px}
+.success-btn{
+  padding:10px 24px;background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;color:var(--txt);font-size:13px;font-weight:500;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;
+}
+.success-btn:hover{border-color:var(--acc);color:var(--acc)}
 </style>
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-icon">📋</div>
-    <div>
-      <div class="sb-logo-name">Sistema Laudo</div>
-      <div class="sb-logo-sub">DEVOLUÇÕES</div>
-    </div>
-  </div>
-  <nav class="sb-nav">
-    <div class="sb-sec">Principal</div>
-    <button class="nav-btn active" onclick="ir('dashboard',this)"><span class="icon">◈</span>Dashboard</button>
-    <button class="nav-btn" onclick="ir('pendencias',this)"><span class="icon">⧖</span>Pendências</button>
-    <button class="nav-btn" onclick="ir('todos',this)"><span class="icon">☰</span>Todos os Registros</button>
-  </nav>
-  <div class="sb-footer">
-    <div class="user-card">
-      <div class="avatar" id="av">?</div>
-      <div>
-        <div class="user-name" id="uName">—</div>
-        <div class="user-email" id="uEmail">—</div>
-      </div>
-    </div>
-    <button class="btn-logout" onclick="sair()">↩ Sair</button>
-  </div>
-</aside>
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
 
-<main class="main">
-  <div class="topbar">
-    <div>
-      <div class="page-title" id="pgTitle">Dashboard</div>
-      <div class="page-sub" id="pgSub">Visão geral · <span id="totalLabel">carregando...</span></div>
+<div class="wrap">
+
+  <!-- ESQUERDO -->
+  <div class="left">
+    <div class="brand">
+      <div class="brand-icon">📋</div>
+      <div class="brand-name">Sistema Laudo</div>
+      <div class="brand-desc">Plataforma de controle de devoluções e qualidade para todas as filiais.</div>
     </div>
-    <div class="filters">
-      <select id="selFilial" onchange="filtrar()"><option value="">Todas as filiais</option></select>
-      <select id="selStatus" onchange="filtrar()">
-        <option value="">Todos os status</option>
-        <option value="Pendente">Pendente</option>
-        <option value="Concluído">Concluído</option>
-        <option value="Validado">Validado</option>
-      </select>
-      <button class="btn-act btn-blue" onclick="reload()">↻ Atualizar</button>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-dot blue"></div>
+        <div class="stat-txt">Registros sincronizados</div>
+        <div class="stat-val" id="statTotal">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-dot green"></div>
+        <div class="stat-txt">Status da conexão</div>
+        <div class="stat-val" id="statConn" style="color:var(--ok)">Online</div>
+      </div>
+      <div class="stat">
+        <div class="stat-dot purple"></div>
+        <div class="stat-txt">Banco de dados</div>
+        <div class="stat-val">Supabase</div>
+      </div>
     </div>
   </div>
 
-  <div class="content">
+  <!-- DIREITO -->
+  <div class="right">
 
-    <div class="section active" id="s-dashboard">
-      <div class="metrics">
-        <div class="mc blue"><div class="mc-icon">📦</div><div class="mc-label">Total Registros</div><div class="mc-val blue" id="mTotal">—</div><div class="mc-sub">em todas as filiais</div></div>
-        <div class="mc yellow"><div class="mc-icon">⏳</div><div class="mc-label">Pendentes</div><div class="mc-val yellow" id="mPend">—</div><div class="mc-sub">aguardando ação</div></div>
-        <div class="mc green"><div class="mc-icon">✓</div><div class="mc-label">Concluídos</div><div class="mc-val green" id="mConc">—</div><div class="mc-sub">finalizados</div></div>
-        <div class="mc purple"><div class="mc-icon">⏱</div><div class="mc-label">SLA Médio Geral</div><div class="mc-val purple" id="mSla">—</div><div class="mc-sub">excl. aguardando/análise</div></div>
-      </div>
-      <div class="charts">
-        <div class="cc"><div class="cc-title">Andamento por Status</div><div class="cc-sub">Distribuição atual</div><div class="cc-wrap"><canvas id="cStatus"></canvas></div></div>
-        <div class="cc"><div class="cc-title">Top Causas Raiz</div><div class="cc-sub">Principais causas identificadas</div><div class="cc-wrap"><canvas id="cCausa"></canvas></div></div>
-        <div class="cc wide">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
-            <div>
-              <div class="cc-title">Volume por Filial</div>
-              <div class="cc-sub" style="margin-bottom:0" id="subFilial">Todos os registros por unidade · excl. aguardando/análise</div>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button class="btn-fil active" id="bf-total" onclick="mudarFilial('total')">Todos</button>
-              <button class="btn-fil" id="bf-pend" onclick="mudarFilial('pend')">Pendentes</button>
-              <button class="btn-fil" id="bf-conc" onclick="mudarFilial('conc')">Concluídos</button>
-            </div>
-          </div>
-          <div class="cc-wrap tall" style="margin-top:12px"><canvas id="cFilial"></canvas></div>
-        </div>
-        <div class="cc wide">
-          <div class="cc-title">SLA Médio por Filial</div>
-          <div class="cc-sub">Média geral de dias por filial · excl. aguardando/análise/vazio</div>
-          <div class="cc-wrap xtall"><canvas id="cSlaFilial"></canvas></div>
-        </div>
-      </div>
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="trocarAba('login')">Entrar</button>
+      <button class="tab" id="tab-cadastro" onclick="trocarAba('cadastro')">Cadastrar</button>
     </div>
 
-    <div class="section" id="s-pendencias">
-      <div class="tc">
-        <div class="tc-head">
-          <div class="tc-title">⧖ Pendências <span id="badge-pend" style="font-size:11px;color:var(--txt2)"></span></div>
-          <div class="tc-actions">
-            <input class="search" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'pend')">
-            <button class="btn-act btn-green" onclick="downloadCSV('pend')">⬇ Baixar CSV</button>
-          </div>
-        </div>
-        <div id="wrap-pend"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
-        <div class="pag">
-          <span id="pi-pend">—</span>
-          <div class="pag-btns">
-            <button class="pb" id="pp-prev" onclick="pag('pend',-1)" disabled>← Anterior</button>
-            <button class="pb" id="pp-next" onclick="pag('pend',1)">Próximo →</button>
-          </div>
-        </div>
+    <!-- FORM LOGIN -->
+    <div class="form active" id="form-login">
+      <div class="form-title">Bem-vindo de volta</div>
+      <div class="form-sub">Entre com suas credenciais para acessar o dashboard.</div>
+
+      <div class="alert alert-err" id="err-login">
+        <span class="alert-icon">⚠</span>
+        <span id="err-login-msg"></span>
       </div>
+
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="l-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="l-senha" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="btn" id="btn-login" onclick="login()">Entrar no sistema</button>
     </div>
 
-    <!-- TODOS OS REGISTROS -->
-    <div class="section" id="s-todos">
-      <div class="tc">
-        <div class="tc-head">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <div class="tc-title">☰ Todos os Registros <span id="badge-todos" style="font-size:11px;color:var(--txt2)"></span></div>
-            <span id="badge-filtro-todos" style="display:none"></span>
+    <!-- FORM CADASTRO -->
+    <div class="form" id="form-cadastro">
+      <div class="form-title">Criar conta</div>
+      <div class="form-sub">Cadastre um novo usuário. O acesso ficará disponível imediatamente.</div>
+
+      <div class="alert alert-err" id="err-cad">
+        <span class="alert-icon">⚠</span>
+        <span id="err-cad-msg"></span>
+      </div>
+
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="c-nome" placeholder="João da Silva" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="c-email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="c-senha" placeholder="Mín. 8 caracteres" autocomplete="new-password" oninput="checarSenha(this.value)">
+        <div class="pwd-strength" id="pwd-strength">
+          <div class="pwd-bars">
+            <div class="pwd-bar" id="pb1"></div>
+            <div class="pwd-bar" id="pb2"></div>
+            <div class="pwd-bar" id="pb3"></div>
+            <div class="pwd-bar" id="pb4"></div>
           </div>
-          <div class="tc-actions">
-            <input class="search" id="search-todos" type="text" placeholder="🔍  Buscar NF, protocolo..." oninput="buscar(this.value,'todos')">
-            <!-- Botão Devolução -->
-            <button class="btn-act btn-warn" id="btn-dev" onclick="filtroEspecial('dev')" title="Pendentes com Parecer aguardando/análise e Data Retorno Devolução preenchida">
-              📦 Devolução
-            </button>
-            <!-- Botão Qualidade -->
-            <button class="btn-act btn-pur" id="btn-qual" onclick="filtroEspecial('qual')" title="Pendentes excluindo pareceres: Apto a Retornar ao Estoque e Segregar">
-              🔬 Qualidade
-            </button>
-            <!-- Botão Limpar Filtro -->
-            <button class="btn-act btn-blue" id="btn-limpar" onclick="limparFiltroEspecial()" style="display:none">✕ Limpar</button>
-            <!-- Botão Download — baixa o que está filtrado -->
-            <button class="btn-act btn-green" onclick="downloadCSV('todos')">⬇ Baixar CSV</button>
-          </div>
+          <div class="pwd-label" id="pwd-label">Digite sua senha</div>
         </div>
-        <div id="wrap-todos"><div class="empty"><span class="mini-spin"></span>Carregando...</div></div>
-        <div class="pag">
-          <span id="pi-todos">—</span>
-          <div class="pag-btns">
-            <button class="pb" id="pt-prev" onclick="pag('todos',-1)" disabled>← Anterior</button>
-            <button class="pb" id="pt-next" onclick="pag('todos',1)">Próximo →</button>
-          </div>
+        <div class="pwd-rules" id="pwd-rules">
+          <div class="pwd-rule" id="r-len"><div class="dot"></div>Mínimo 8 caracteres</div>
+          <div class="pwd-rule" id="r-num"><div class="dot"></div>Pelo menos 1 número</div>
+          <div class="pwd-rule" id="r-upp"><div class="dot"></div>Pelo menos 1 letra maiúscula</div>
         </div>
       </div>
-    </div>
-
-  </div>
-</main>
-
-<div class="overlay" id="overlay" onclick="if(event.target===this)fechar()">
-  <div class="modal">
-    <div class="modal-top">
-      <div>
-        <div class="modal-title" id="m-title">Detalhes</div>
-        <div class="modal-sub" id="m-sub"></div>
+      <div class="field">
+        <label>Confirmar senha</label>
+        <input type="password" id="c-conf" placeholder="Repita a senha" autocomplete="new-password">
       </div>
-      <button class="modal-x" onclick="fechar()">✕</button>
+
+      <button class="btn" id="btn-cad" onclick="cadastrar()">Criar conta</button>
     </div>
-    <div class="dg" id="m-body"></div>
+
+    <!-- SUCESSO CADASTRO -->
+    <div class="success-state" id="success-cad">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Conta criada!</div>
+      <div class="success-desc" id="success-desc">Usuário cadastrado com sucesso no Supabase. Agora você já pode fazer login.</div>
+      <button class="success-btn" onclick="trocarAba('login')">Ir para o login →</button>
+    </div>
+
   </div>
 </div>
 
 <script>
-Chart.register(ChartDataLabels)
-Chart.defaults.set('plugins.datalabels',{display:false})
-
-var _sb = supabase.createClient(
+var _client = supabase.createClient(
   'https://jsppfrdhkekkkjemkzju.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vra2tqZW1remp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTc2MDIsImV4cCI6MjA4OTE3MzYwMn0.okK6pdZdhIcj9L_sLvLsc-iVnU_irisJoF1dDlSMbGg'
 )
 
-var todos=[], filtrado=[], dadosTodos=[], pgPend=0, pgTodos=0, PG=25, charts={}, modoFilial='total'
-var filtroAtivo='' // '' | 'dev' | 'qual'
-
-// ── LISTAS DE PARECERES ───────────────────────────────────────
-
-// Excluídos do Volume por Filial (gráfico)
-var PARECER_EXCLUIDOS_VOLUME=[
-  'aguardando retorno de evidencia transportador',
-  'aguardando retorno de evidencia transportadora',
-  'aguardando retorno de estabilidade',
-  'em analise',
-  'em analise qualidade'
-]
-
-// Excluídos do SLA médio (inclui vazio)
-var PARECER_EXCLUIDOS_SLA=[
-  'aguardando retorno de evidencia transportador',
-  'aguardando retorno de evidencia transportadora',
-  'aguardando retorno de estabilidade',
-  'em analise',
-  'em analise qualidade'
-]
-
-// Pareceres "aguardando/análise" — usados no filtro DEVOLUÇÃO
-var PARECER_AGUARDANDO=[
-  'aguardando retorno de evidencia transportador',
-  'aguardando retorno de evidencia transportadora',
-  'aguardando retorno de estabilidade',
-  'em analise',
-  'em analise qualidade'
-]
-
-// Pareceres EXCLUÍDOS do filtro QUALIDADE
-var PARECER_EXCLUIDOS_QUAL=[
-  'apto a retornar ao estoque',
-  'segregar'
-]
-
-function normalizar(s){
-  return (s||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-}
-
-function parecerExcluidoVolume(r){
-  var p=normalizar(r.Parecer_da_Qualidade)
-  return PARECER_EXCLUIDOS_VOLUME.some(function(ex){
-    var n=normalizar(ex); return p===n||p.indexOf(n)>-1
-  })
-}
-
-function parecerExcluidoSLA(r){
-  var p=normalizar(r.Parecer_da_Qualidade)
-  if(p==='') return true
-  return PARECER_EXCLUIDOS_SLA.some(function(ex){
-    var n=normalizar(ex); return n!==''&&(p===n||p.indexOf(n)>-1)
-  })
-}
-
-// Verifica se parecer é "aguardando/análise"
-function parecerAguardando(r){
-  var p=normalizar(r.Parecer_da_Qualidade)
-  return PARECER_AGUARDANDO.some(function(ex){
-    var n=normalizar(ex); return p===n||p.indexOf(n)>-1
-  })
-}
-
-// Verifica se parecer deve ser EXCLUÍDO do filtro Qualidade
-function parecerExcluidoQual(r){
-  var p=normalizar(r.Parecer_da_Qualidade)
-  return PARECER_EXCLUIDOS_QUAL.some(function(ex){
-    var n=normalizar(ex); return p===n||p.indexOf(n)>-1
-  })
-}
-
-// ── AUTH ──────────────────────────────────────────────────────
-_sb.auth.getSession().then(function(r){
-  if(!r.data||!r.data.session){location.href='index.html';return}
-  var u=r.data.session.user
-  document.getElementById('uName').textContent=u.email.split('@')[0]
-  document.getElementById('uEmail').textContent=u.email
-  document.getElementById('av').textContent=u.email[0].toUpperCase()
-  carregar()
+// Verifica sessão
+_client.auth.getSession().then(function(r){
+  if(r.data&&r.data.session) location.href='dashboard.html'
 })
 
-function sair(){_sb.auth.signOut().then(function(){location.href='index.html'})}
+// Carrega total de registros
+_client.from('tbl_baselaudo').select('*',{count:'exact',head:true}).then(function(r){
+  if(r.count) document.getElementById('statTotal').textContent=r.count.toLocaleString('pt-BR')
+})
 
-async function carregar(){
-  document.getElementById('totalLabel').textContent='carregando...'
-  var acum=[], pg=0, tam=1000
-  while(true){
-    var res=await _sb.from('tbl_baselaudo').select('*').range(pg*tam,(pg+1)*tam-1).order('Protocolo',{ascending:false})
-    if(res.error||!res.data||res.data.length===0)break
-    acum=acum.concat(res.data)
-    if(res.data.length<tam)break
-    pg++
-  }
-  todos=acum
-  document.getElementById('totalLabel').textContent=todos.length.toLocaleString('pt-BR')+' registros'
-  popularFiliais()
-  filtrar()
+// Enter no login
+document.getElementById('l-senha').onkeydown=function(e){if(e.key==='Enter')login()}
+
+// TROCAR ABA
+function trocarAba(aba){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')})
+  document.querySelectorAll('.form').forEach(function(f){f.classList.remove('active')})
+  document.getElementById('success-cad').classList.remove('active')
+  document.getElementById('tab-'+aba).classList.add('active')
+  document.getElementById('form-'+aba).classList.add('active')
+  ocultarErros()
 }
 
-function reload(){todos=[];filtrado=[];dadosTodos=[];filtroAtivo='';carregar()}
-
-function popularFiliais(){
-  var sel=document.getElementById('selFilial')
-  var fs=[...new Set(todos.map(function(r){return r.Filial}).filter(Boolean))].sort()
-  sel.innerHTML='<option value="">Todas as filiais</option>'
-  fs.forEach(function(f){var o=document.createElement('option');o.value=f;o.textContent='Filial '+f;sel.appendChild(o)})
+function ocultarErros(){
+  document.getElementById('err-login').classList.remove('active')
+  document.getElementById('err-cad').classList.remove('active')
 }
 
-function filtrar(){
-  var fil=document.getElementById('selFilial').value
-  var sta=document.getElementById('selStatus').value
-  filtrado=todos.filter(function(r){
-    if(fil&&r.Filial!==fil)return false
-    if(sta&&r.Andamento!==sta)return false
-    return true
-  })
-  pgPend=0; pgTodos=0
-  // Resetar filtro especial ao mudar filtros gerais
-  filtroAtivo=''
-  // Todos os Registros exclui usuários Annecio e Gleydson
-  dadosTodos=filtrado.filter(function(r){
-    var u=normalizar(r.Usuario||'')
-    return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1
-  })
-  atualizarBadgeFiltro()
-  metricas(); graficos(); tabela('pend'); tabela('todos')
+function mostrarErro(id,msg){
+  document.getElementById(id).classList.add('active')
+  document.getElementById(id+'-msg').textContent=msg
 }
 
-// ── FILTROS ESPECIAIS (Devolução / Qualidade) ─────────────────
-function filtroEspecial(tipo){
-  if(filtroAtivo===tipo){
-    // toggle off
-    limparFiltroEspecial()
-    return
-  }
-  filtroAtivo=tipo
-  pgTodos=0
+// LOGIN
+function login(){
+  var email=document.getElementById('l-email').value.trim()
+  var senha=document.getElementById('l-senha').value
+  var btn=document.getElementById('btn-login')
+  ocultarErros()
 
-  if(tipo==='dev'){
-    // Pendentes + SEM pareceres aguardando/análise + Data_Retorno_para_Devolucao preenchida
-    dadosTodos=filtrado.filter(function(r){
-      var isPend=(r.Andamento==='Pendente'||!r.Andamento)
-      var naoAguardando=!parecerAguardando(r)
-      var temRetorno=r.Data_Retorno_para_Devolucao&&r.Data_Retorno_para_Devolucao.toString().trim()!==''&&r.Data_Retorno_para_Devolucao!=='—'
-      return isPend&&naoAguardando&&temRetorno
-    })
-  } else if(tipo==='qual'){
-    // Pendentes excluindo pareceres "Apto a Retornar ao Estoque" e "Segregar"
-    dadosTodos=filtrado.filter(function(r){
-      var isPend=(r.Andamento==='Pendente'||!r.Andamento)
-      var excluido=parecerExcluidoQual(r)
-      return isPend&&!excluido
-    })
-  }
+  if(!email||!senha){mostrarErro('err-login','Preencha e-mail e senha.');return}
 
-  atualizarBadgeFiltro()
-  tabela('todos')
+  btn.disabled=true
+  btn.innerHTML='<span class="spin"></span>Entrando...'
 
-  // Destacar botão ativo
-  document.getElementById('btn-dev').style.opacity = tipo==='dev' ? '1' : '0.5'
-  document.getElementById('btn-qual').style.opacity = tipo==='qual' ? '1' : '0.5'
-  document.getElementById('btn-limpar').style.display='flex'
-}
-
-function limparFiltroEspecial(){
-  filtroAtivo=''
-  dadosTodos=filtrado.filter(function(r){
-    var u=normalizar(r.Usuario||'')
-    return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1
-  })
-  pgTodos=0
-  atualizarBadgeFiltro()
-  tabela('todos')
-  document.getElementById('btn-dev').style.opacity='1'
-  document.getElementById('btn-qual').style.opacity='1'
-  document.getElementById('btn-limpar').style.display='none'
-}
-
-function atualizarBadgeFiltro(){
-  var badge=document.getElementById('badge-filtro-todos')
-  if(filtroAtivo==='dev'){
-    badge.style.display='inline-flex'
-    badge.className='filtro-badge dev'
-    badge.textContent='📦 Filtro: Devolução'
-  } else if(filtroAtivo==='qual'){
-    badge.style.display='inline-flex'
-    badge.className='filtro-badge qual'
-    badge.textContent='🔬 Filtro: Qualidade'
-  } else {
-    badge.style.display='none'
-  }
-}
-
-// ── MODO FILIAL ───────────────────────────────────────────────
-function mudarFilial(modo){
-  modoFilial=modo
-  document.querySelectorAll('.btn-fil').forEach(function(b){b.classList.remove('active')})
-  document.getElementById('bf-'+modo).classList.add('active')
-  var subs={
-    total:'Todos os registros por unidade · excl. aguardando/análise',
-    pend: 'Registros pendentes por unidade · excl. aguardando/análise',
-    conc: 'Registros concluídos por unidade · excl. aguardando/análise'
-  }
-  document.getElementById('subFilial').textContent=subs[modo]
-  desenharFilial()
-}
-
-function desenharFilial(){
-  var base
-  if(modoFilial==='pend') base=filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
-  else if(modoFilial==='conc') base=filtrado.filter(function(r){return r.Andamento==='Concluído'})
-  else base=filtrado
-  base=base.filter(function(r){return !parecerExcluidoVolume(r)})
-  var fm={}
-  base.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
-  var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-  barraComLabels('cFilial',Object.fromEntries(sf),'#d29922')
-}
-
-// ── SLA ───────────────────────────────────────────────────────
-function calcSLA(r){
-  var envio=parseBR(r.Data_Envio_para_Qualidade)
-  if(!envio) return null
-  var and=(r.Andamento||'').trim()
-  if(and==='Concluído'){
-    var ret=parseBR(r.Data_Retorno_da_Qualidade)
-    if(ret) return diffDias(envio,ret)
-    return diffDias(envio,new Date())
-  }
-  return diffDias(envio,new Date())
-}
-
-function parseBR(v){
-  if(!v) return null
-  v=v.toString().trim()
-  var m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
-  if(m) return new Date(+m[3],+m[2]-1,+m[1])
-  var m2=v.match(/^(\d{4})-(\d{2})-(\d{2})/)
-  if(m2) return new Date(+m2[1],+m2[2]-1,+m2[3])
-  return null
-}
-
-function diffDias(d1,d2){
-  return Math.max(0,Math.floor((d2-d1)/(1000*60*60*24)))
-}
-
-function slaHtml(r){
-  var dias=calcSLA(r)
-  if(dias===null) return '<span class="sla-closed">—</span>'
-  var and=(r.Andamento||'').trim()
-  if(and==='Concluído') return '<span class="sla-closed">'+dias+'d ✓</span>'
-  if(dias<=7)  return '<span class="sla-ok">'+dias+'d</span>'
-  if(dias<=15) return '<span class="sla-warn">'+dias+'d ⚠</span>'
-  return '<span class="sla-danger">'+dias+'d !</span>'
-}
-
-// ── MÉTRICAS ──────────────────────────────────────────────────
-function metricas(){
-  var n=filtrado.length
-  var p=filtrado.filter(function(r){return r.Andamento==='Pendente'}).length
-  var c=filtrado.filter(function(r){return r.Andamento==='Concluído'}).length
-  var slasTodos=filtrado
-    .filter(function(r){return !parecerExcluidoSLA(r)})
-    .map(function(r){return calcSLA(r)})
-    .filter(function(v){return v!==null})
-  var media=slasTodos.length?Math.round(slasTodos.reduce(function(a,b){return a+b},0)/slasTodos.length):0
-  document.getElementById('mTotal').textContent=n.toLocaleString('pt-BR')
-  document.getElementById('mPend').textContent=p.toLocaleString('pt-BR')
-  document.getElementById('mConc').textContent=c.toLocaleString('pt-BR')
-  document.getElementById('mSla').textContent=media+'d'
-}
-
-// ── GRÁFICOS ──────────────────────────────────────────────────
-function graficos(){
-  var sm={}
-  filtrado.forEach(function(r){var s=r.Andamento||'N/D';sm[s]=(sm[s]||0)+1})
-  donut('cStatus',sm,['#2f81f7','#d29922','#3fb950','#bc8cff','#f85149','#484f58'])
-
-  var cm={}
-  filtrado.forEach(function(r){var c=r.Causa_Raiz||'Não informado';cm[c]=(cm[c]||0)+1})
-  var top=Object.entries(cm).sort(function(a,b){return b[1]-a[1]}).slice(0,7)
-  barraComLabels('cCausa',Object.fromEntries(top),'#bc8cff')
-
-  desenharFilial()
-
-  var slaMap={}
-  filtrado.forEach(function(r){
-    if(parecerExcluidoSLA(r)) return
-    var sla=calcSLA(r); if(sla===null) return
-    var f='F'+(r.Filial||'?')
-    if(!slaMap[f]) slaMap[f]={total:0,qtd:0}
-    slaMap[f].total+=sla; slaMap[f].qtd+=1
-  })
-  var slaMedia={}
-  Object.keys(slaMap).forEach(function(f){
-    slaMedia[f]=parseFloat((slaMap[f].total/slaMap[f].qtd).toFixed(1))
-  })
-  var slaOrdenado=Object.entries(slaMedia).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-
-  if(charts['cSlaFilial'])charts['cSlaFilial'].destroy()
-  var ctx=document.getElementById('cSlaFilial');if(!ctx)return
-  charts['cSlaFilial']=new Chart(ctx,{
-    type:'bar',
-    data:{labels:slaOrdenado.map(function(e){return e[0]}),datasets:[{data:slaOrdenado.map(function(e){return e[1]}),backgroundColor:'#3dc9b055',borderColor:'#3dc9b0',borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},datalabels:{display:true,color:'#3dc9b0',anchor:'end',align:'top',font:{size:10,weight:'600'},formatter:function(v){return v+'d'}}},
-      layout:{padding:{top:20}},
-      scales:{
-        x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},
-        y:{ticks:{color:'#8b949e',font:{size:10},callback:function(v){return v+'d'}},grid:{color:'#21262d'},border:{color:'#21262d'},beginAtZero:true,title:{display:true,text:'SLA Médio (dias)',color:'#484f58',font:{size:10}}}
-      }}
-  })
-}
-
-function donut(id,data,colors){
-  if(charts[id])charts[id].destroy()
-  var ctx=document.getElementById(id);if(!ctx)return
-  charts[id]=new Chart(ctx,{type:'doughnut',
-    data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:11,family:'Inter'},padding:10,boxWidth:10}},
-        datalabels:{display:true,color:'#fff',font:{size:19,weight:'700'},formatter:function(v,ctx){var total=ctx.dataset.data.reduce(function(a,b){return a+b},0);var pct=Math.round(v/total*100);return pct>3?pct+'%':''}}}
-    }})
-}
-
-function barraComLabels(id,data,cor){
-  if(charts[id])charts[id].destroy()
-  var ctx=document.getElementById(id);if(!ctx)return
-  charts[id]=new Chart(ctx,{type:'bar',
-    data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:cor+'55',borderColor:cor,borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},datalabels:{display:true,color:cor,anchor:'end',align:'top',font:{size:10,weight:'600'},formatter:function(v){return v}}},
-      layout:{padding:{top:18}},
-      scales:{x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'#21262d'},border:{color:'#21262d'}}}
-    }})
-}
-
-// ── TABELAS ───────────────────────────────────────────────────
-function tabela(tipo){
-  var isPend=tipo==='pend'
-  // Para "todos" usa dadosTodos (que pode estar filtrado por especial)
-  var dados=isPend
-    ? filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
-    : dadosTodos
-  var pg=isPend?pgPend:pgTodos
-  var ini=pg*PG, tot=dados.length
-  var fatia=dados.slice(ini,ini+PG)
-
-  if(isPend){
-    document.getElementById('badge-pend').textContent='· '+tot+' registros'
-    document.getElementById('pi-pend').textContent=Math.min(ini+1,tot)+' – '+Math.min(ini+PG,tot)+' de '+tot.toLocaleString('pt-BR')
-    document.getElementById('pp-prev').disabled=pg===0
-    document.getElementById('pp-next').disabled=ini+PG>=tot
-  } else {
-    document.getElementById('badge-todos').textContent='· '+tot+' registros'
-    document.getElementById('pi-todos').textContent=Math.min(ini+1,tot)+' – '+Math.min(ini+PG,tot)+' de '+tot.toLocaleString('pt-BR')
-    document.getElementById('pt-prev').disabled=pg===0
-    document.getElementById('pt-next').disabled=ini+PG>=tot
-  }
-
-  var wid=isPend?'wrap-pend':'wrap-todos'
-  if(!fatia.length){document.getElementById(wid).innerHTML='<div class="empty">Nenhum registro encontrado</div>';return}
-
-  var rows=fatia.map(function(r){
-    var j=JSON.stringify(r).replace(/\\/g,'\\\\').replace(/'/g,'&#39;')
-    return '<tr onclick=\'abrir('+j+')\'>' +
-      '<td class="mono">'+e(r.Protocolo)+'</td>'+
-      '<td class="mono">'+e(r.NF_Origem)+'</td>'+
-      '<td>'+e(r.Filial)+'</td>'+
-      '<td>'+e(r.Temperatura_do_Produto)+'</td>'+
-      '<td style="max-width:140px">'+e(r.Parecer_da_Qualidade)+'</td>'+
-      '<td>'+badge(r.Andamento)+'</td>'+
-      '<td>'+slaHtml(r)+'</td>'+
-      '<td style="max-width:130px">'+e(r.Causa_Raiz)+'</td>'+
-    '</tr>'
-  }).join('')
-
-  document.getElementById(wid).innerHTML=
-    '<table><thead><tr>'+
-    '<th>Protocolo</th><th>NF Origem</th><th>Filial</th>'+
-    '<th>Temperatura</th><th>Parecer Qualidade</th><th>Status</th>'+
-    '<th>SLA</th><th>Causa Raiz</th>'+
-    '</tr></thead><tbody>'+rows+'</tbody></table>'
-}
-
-function e(v){return v||'—'}
-
-function badge(s){
-  var m={'Pendente':'b-pend','Concluído':'b-ok','Validado':'b-blue'}
-  return '<span class="badge '+(m[s]||'b-nd')+'">'+(s||'N/D')+'</span>'
-}
-
-function pag(tipo,dir){
-  if(tipo==='pend')pgPend=Math.max(0,pgPend+dir)
-  else pgTodos=Math.max(0,pgTodos+dir)
-  tabela(tipo)
-}
-
-var bTimer=null
-function buscar(q,tipo){
-  clearTimeout(bTimer)
-  bTimer=setTimeout(function(){
-    q=q.toLowerCase()
-    // busca dentro do conjunto atual (filtrado ou dadosTodos)
-    var base=tipo==='pend'
-      ? filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
-      : dadosTodos
-    var resultado=base.filter(function(r){
-      return (r.Protocolo||'').toLowerCase().includes(q)||
-             (r.NF_Origem||'').toLowerCase().includes(q)||
-             (r.Parecer_da_Qualidade||'').toLowerCase().includes(q)||
-             (r.Temperatura_do_Produto||'').toLowerCase().includes(q)
-    })
-    if(tipo==='pend'){filtrado=resultado;pgPend=0;tabela('pend')}
-    else{dadosTodos=resultado;pgTodos=0;tabela('todos')}
-  },250)
-}
-
-// ── DOWNLOAD CSV — baixa o que está visível na tabela ─────────
-function downloadCSV(tipo){
-  // Fonte dos dados: pendências usa todos Pendentes; todos usa dadosTodos (filtrado especial ou não)
-  var fonte
-  if(tipo==='pend'){
-    fonte=filtrado.filter(function(r){return r.Andamento==='Pendente'||!r.Andamento})
-  } else {
-    fonte=dadosTodos
-  }
-
-  if(!fonte.length){alert('Nenhum registro para exportar.');return}
-
-  var nomeArquivo='registros'
-  if(filtroAtivo==='dev') nomeArquivo='devolucao'
-  else if(filtroAtivo==='qual') nomeArquivo='qualidade'
-  else if(tipo==='pend') nomeArquivo='pendentes'
-
-  var cols=['Protocolo','NF_Origem','Filial','Nome_Cliente','Produto','Temperatura_do_Produto','Parecer_da_Qualidade','Andamento','Causa_Raiz','Data_Envio_para_Qualidade','Data_Retorno_da_Qualidade','Data_Retorno_para_Devolucao','Transportadora___Devolucao','Amazem_Destino','Observacao_Devolucao','Observacao_Qualidade','Usuario','Usuario_Qualidade','SLA_Calculado']
-
-  var linhas=fonte.map(function(r){
-    var rc=Object.assign({},r)
-    var s=calcSLA(r);rc.SLA_Calculado=s!==null?s+'d':''
-    return cols.map(function(c){
-      var v=rc[c]!==undefined&&rc[c]!==null?String(rc[c]):''
-      v=v.replace(/"/g,'""')
-      if(v.indexOf(';')>-1||v.indexOf('\n')>-1||v.indexOf('"')>-1) v='"'+v+'"'
-      return v
-    }).join(';')
-  })
-
-  var csv='\uFEFF'+cols.join(';')+'\n'+linhas.join('\n')
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'})
-  var url=URL.createObjectURL(blob)
-  var a=document.createElement('a')
-  var hoje=new Date()
-  var dt=hoje.getDate().toString().padStart(2,'0')+'_'+(hoje.getMonth()+1).toString().padStart(2,'0')+'_'+hoje.getFullYear()
-  a.href=url; a.download=nomeArquivo+'_'+dt+'.csv'
-  document.body.appendChild(a); a.click()
-  document.body.removeChild(a); URL.revokeObjectURL(url)
-}
-
-// ── MODAL ─────────────────────────────────────────────────────
-function abrir(r){
-  var slaCalc=calcSLA(r)
-  var and=(r.Andamento||'').trim()
-  var slaTexto=slaCalc!==null?slaCalc+'d ('+(and==='Concluído'?'encerrado — retorno menos envio':'em aberto — envio até hoje')+')':'—'
-  var excl=parecerExcluidoSLA(r)?'⚠ excluído do SLA médio':''
-  document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
-  document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)+(excl?' · '+excl:'')
-  var campos=[
-    ['NF Origem',r.NF_Origem],['Filial',r.Filial],
-    ['Nome Cliente',r.Nome_Cliente],['Produto',r.Produto],
-    ['Armazém Destino',r.Amazem_Destino],['Temperatura',r.Temperatura_do_Produto],
-    ['Transportadora Dev.',r.Transportadora___Devolucao],['Transportadora Qual.',r.Transportadora_Qualidade],
-    ['Data Envio Qualidade',r.Data_Envio_para_Qualidade],['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],
-    ['Data Retorno Devolução',r.Data_Retorno_para_Devolucao],['Data Receb. Filial',r.Data_Recebimento_Filial],
-    ['Andamento',r.Andamento],['SLA Calculado',slaTexto],
-    ['Causa Raiz',r.Causa_Raiz],['Parecer Qualidade',r.Parecer_da_Qualidade],
-    ['Obs. Devolução',r.Observacao_Devolucao],['Obs. Qualidade',r.Observacao_Qualidade],
-    ['Usuário',r.Usuario],['Usuário Qualidade',r.Usuario_Qualidade],['Validação',r.Validacao],
-  ]
-  document.getElementById('m-body').innerHTML=campos.map(function(p){
-    return '<div class="di"><div class="dl">'+p[0]+'</div><div class="dv">'+(p[1]||'—')+'</div></div>'
-  }).join('')
-  document.getElementById('overlay').classList.add('open')
-}
-
-function fechar(){document.getElementById('overlay').classList.remove('open')}
-
-// ── NAVEGAÇÃO ─────────────────────────────────────────────────
-var secs={
-  dashboard:{id:'s-dashboard',title:'Dashboard',sub:'Visão geral'},
-  pendencias:{id:'s-pendencias',title:'Pendências',sub:'Registros aguardando ação'},
-  todos:{id:'s-todos',title:'Todos os Registros',sub:'Histórico completo'},
-}
-function ir(nome,el){
-  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active')})
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')})
-  document.getElementById(secs[nome].id).classList.add('active')
-  el.classList.add('active')
-  document.getElementById('pgTitle').textContent=secs[nome].title
-  document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
-// ==============================
-// AUTO ATUALIZAÇÃO CONTROLADA
-// ==============================
-function iniciarAutoAtualizacao() {
-
-  // Evita múltiplos intervals
-  if (autoRefresh !== null) return
-
-  autoRefresh = setInterval(async function () {
-    console.log('Atualizando dashboard automaticamente...')
-
-    try {
-      await carregar()
-    } catch (e) {
-      console.error('Erro ao atualizar:', e)
+  _client.auth.signInWithPassword({email:email,password:senha}).then(function(r){
+    if(r.error){
+      var msg=r.error.message
+      if(msg.includes('Invalid'))msg='E-mail ou senha incorretos.'
+      if(msg.includes('confirmed'))msg='E-mail não confirmado. Contate o administrador.'
+      mostrarErro('err-login',msg)
+      btn.disabled=false
+      btn.innerHTML='Entrar no sistema'
+    } else {
+      btn.innerHTML='<span class="spin"></span>Redirecionando...'
+      location.href='dashboard.html'
     }
+  })
+}
 
-  }, 60000) // 1 minuto correto
+// VERIFICAR FORÇA DA SENHA
+function checarSenha(v){
+  var s=document.getElementById('pwd-strength')
+  var r=document.getElementById('pwd-rules')
+  if(!v){s.style.display='none';r.style.display='none';return}
+  s.style.display='block';r.style.display='block'
+
+  var rLen=document.getElementById('r-len')
+  var rNum=document.getElementById('r-num')
+  var rUpp=document.getElementById('r-upp')
+
+  var hasLen=v.length>=8
+  var hasNum=/\d/.test(v)
+  var hasUpp=/[A-Z]/.test(v)
+
+  rLen.className='pwd-rule'+(hasLen?' ok':'')
+  rNum.className='pwd-rule'+(hasNum?' ok':'')
+  rUpp.className='pwd-rule'+(hasUpp?' ok':'')
+
+  var score=(hasLen?1:0)+(hasNum?1:0)+(hasUpp?1:0)+(v.length>=12?1:0)
+  var cores=['#f85149','#d29922','#2f81f7','#3fb950']
+  var labels=['Muito fraca','Fraca','Boa','Forte']
+  var bars=['pb1','pb2','pb3','pb4']
+
+  bars.forEach(function(b,i){
+    document.getElementById(b).style.background=i<score?cores[score-1]:'var(--b1)'
+  })
+  document.getElementById('pwd-label').textContent=labels[score-1]||'Digite sua senha'
+  document.getElementById('pwd-label').style.color=cores[score-1]||'var(--txt2)'
+}
+
+// CADASTRO
+function cadastrar(){
+  var nome=document.getElementById('c-nome').value.trim()
+  var email=document.getElementById('c-email').value.trim()
+  var senha=document.getElementById('c-senha').value
+  var conf=document.getElementById('c-conf').value
+  var btn=document.getElementById('btn-cad')
+  ocultarErros()
+
+  if(!nome){mostrarErro('err-cad','Preencha o nome completo.');return}
+  if(!email||!email.includes('@')){mostrarErro('err-cad','Informe um e-mail válido.');return}
+
+var dominiosPermitidos=['@mafrasaude.com.br','@viveo.com.br']
+var domOk=dominiosPermitidos.some(function(d){return email.toLowerCase().endsWith(d)})
+if(!domOk){mostrarErro('err-cad','Apenas e-mails @mafrasaude.com.br ou @viveo.com.br são permitidos.');return}
+  if(senha.length<8){mostrarErro('err-cad','A senha precisa ter ao menos 8 caracteres.');return}
+  if(senha!==conf){mostrarErro('err-cad','As senhas não coincidem.');return}
+
+  btn.disabled=true
+  btn.innerHTML='<span class="spin"></span>Criando conta...'
+
+  _client.auth.signUp({
+    email:email,
+    password:senha,
+    options:{data:{full_name:nome}}
+  }).then(function(r){
+    if(r.error){
+      var msg=r.error.message
+      if(msg.includes('already'))msg='Este e-mail já está cadastrado.'
+      if(msg.includes('weak'))msg='Senha muito fraca. Use letras, números e maiúsculas.'
+      mostrarErro('err-cad',msg)
+      btn.disabled=false
+      btn.innerHTML='Criar conta'
+    } else {
+      document.getElementById('form-cadastro').classList.remove('active')
+      document.getElementById('success-cad').classList.add('active')
+      document.getElementById('success-desc').textContent=
+        'Usuário "'+nome+'" cadastrado com sucesso. Use o e-mail '+email+' para fazer login.'
+      btn.disabled=false
+      btn.innerHTML='Criar conta'
+    }
+  })
 }
 </script>
 </body>
