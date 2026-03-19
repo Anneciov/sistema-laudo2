@@ -796,10 +796,15 @@ function ir(nome,el){
 // ==============================
 // AUTO ATUALIZAÇÃO A CADA 1 MIN
 // ==============================
-setInterval(function(){
+setInterval(async function(){
   console.log('Atualizando dashboard automaticamente...')
-  reload()
-}, 60000) // 60000 ms = 1 minuto
+  try {
+    await carregar()
+  } catch(e) {
+    console.error('Erro ao atualizar:', e)
+  }
+ 
+}, 60000)
 }
 </script>
 </body>
