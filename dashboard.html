@@ -670,13 +670,11 @@ function donut(id,data){
   })
 }
 
-  function barraComLabels(id,data){
+ function barraComLabels(id, data, cor){
   if(charts[id]) charts[id].destroy()
   
   var ctx = document.getElementById(id)
   if(!ctx) return
-
-  const cor = '#2ecc71' // 🟢 verde padrão
 
   charts[id] = new Chart(ctx,{
     type:'bar',
@@ -684,7 +682,7 @@ function donut(id,data){
       labels:Object.keys(data),
       datasets:[{
         data:Object.values(data),
-        backgroundColor:cor+'55',
+        backgroundColor:cor + '55', // transparência
         borderColor:cor,
         borderWidth:1,
         borderRadius:4,
@@ -721,7 +719,6 @@ function donut(id,data){
     }
   })
 }
-
 // ── TABELAS ───────────────────────────────────────────────────
 function tabela(tipo){
   var isPend=tipo==='pend'
