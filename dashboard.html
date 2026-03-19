@@ -613,22 +613,11 @@ function donut(id,data){
   var ctx = document.getElementById(id)
   if(!ctx) return
 
-const palette = ['#2ecc71','#3498db','#00ffff','#f1c40f','#32cd32','rgba(0,0,0,0)']
+  // 🎨 Paleta fixa (4 cores)
+  const palette = ['#2ecc71', '#3498db', '#00ffff', '#f1c40f']
 
-let idx = 0
-
-const cores = Object.keys(data).map(k => {
-  const key = k.toLowerCase()
-
-  if(key.includes('conclu')) return '#2ecc71' // verde
-  if(key.includes('pend')) return '#f1c40f'   // amarelo
-
-  // fallback sequencial
-  const cor = palette[idx % palette.length]
-  idx++
-  return cor
-})
-
+  // Aplica cores em sequência
+  const cores = Object.keys(data).map((_, i) => palette[i % palette.length])
 
   charts[id] = new Chart(ctx,{
     type:'doughnut',
