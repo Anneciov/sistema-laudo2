@@ -794,17 +794,23 @@ function ir(nome,el){
   document.getElementById('pgTitle').textContent=secs[nome].title
   document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
 // ==============================
-// AUTO ATUALIZAÇÃO A CADA 1 MIN
+// AUTO ATUALIZAÇÃO CONTROLADA
 // ==============================
-setInterval(async function(){
-  console.log('Atualizando dashboard automaticamente...')
-  try {
-    await carregar()
-  } catch(e) {
-    console.error('Erro ao atualizar:', e)
-  }
- 
-}, 600)
+function iniciarAutoAtualizacao() {
+
+  // Evita múltiplos intervals
+  if (autoRefresh !== null) return
+
+  autoRefresh = setInterval(async function () {
+    console.log('Atualizando dashboard automaticamente...')
+
+    try {
+      await carregar()
+    } catch (e) {
+      console.error('Erro ao atualizar:', e)
+    }
+
+  }, 60000) // 1 minuto correto
 }
 </script>
 </body>
