@@ -794,23 +794,31 @@ function ir(nome,el){
   document.getElementById('pgTitle').textContent=secs[nome].title
   document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
 }
-  // ==============================
-// ATUALIZAÇÃO EM TEMPO REAL (SUPABASE)
 // ==============================
+// REALTIME + AUTO UPDATE 1 MIN
+// ==============================
+ 
+// Atualização em tempo real (para todos)
 _sb.channel('realtime-laudos')
   .on(
     'postgres_changes',
     {
-      event: '*', // INSERT, UPDATE, DELETE
+      event: '*',
       schema: 'public',
       table: 'tbl_baselaudo'
     },
     function(payload){
       console.log('Mudança detectada:', payload)
-      carregar() // atualiza tudo automaticamente
+      carregar()
     }
   )
   .subscribe()
+ 
+// Backup: atualiza a cada 1 minuto
+setInterval(function(){
+  console.log('Atualização automática (1 min)')
+  carregar()
+}, 600)
 </script>
 </body>
 </html>
