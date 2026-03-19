@@ -412,7 +412,11 @@ function filtrar(){
   pgPend=0; pgTodos=0
   // Resetar filtro especial ao mudar filtros gerais
   filtroAtivo=''
-  dadosTodos=filtrado
+  // Todos os Registros exclui usuários Annecio e Gleydson
+  dadosTodos=filtrado.filter(function(r){
+    var u=normalizar(r.Usuario||'')
+    return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1
+  })
   atualizarBadgeFiltro()
   metricas(); graficos(); tabela('pend'); tabela('todos')
 }
@@ -428,12 +432,12 @@ function filtroEspecial(tipo){
   pgTodos=0
 
   if(tipo==='dev'){
-    // Pendentes + Parecer aguardando/análise + Data_Retorno_para_Devolucao preenchida
+    // Pendentes + SEM pareceres aguardando/análise + Data_Retorno_para_Devolucao preenchida
     dadosTodos=filtrado.filter(function(r){
       var isPend=(r.Andamento==='Pendente'||!r.Andamento)
-      var parecer=parecerAguardando(r)
+      var naoAguardando=!parecerAguardando(r)
       var temRetorno=r.Data_Retorno_para_Devolucao&&r.Data_Retorno_para_Devolucao.toString().trim()!==''&&r.Data_Retorno_para_Devolucao!=='—'
-      return isPend&&parecer&&temRetorno
+      return isPend&&naoAguardando&&temRetorno
     })
   } else if(tipo==='qual'){
     // Pendentes excluindo pareceres "Apto a Retornar ao Estoque" e "Segregar"
@@ -455,7 +459,10 @@ function filtroEspecial(tipo){
 
 function limparFiltroEspecial(){
   filtroAtivo=''
-  dadosTodos=filtrado
+  dadosTodos=filtrado.filter(function(r){
+    var u=normalizar(r.Usuario||'')
+    return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1
+  })
   pgTodos=0
   atualizarBadgeFiltro()
   tabela('todos')
