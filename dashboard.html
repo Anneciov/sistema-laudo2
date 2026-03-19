@@ -451,6 +451,18 @@ if(!domOk){mostrarErro('err-cad','Apenas e-mails @mafrasaude.com.br ou @viveo.co
       btn.innerHTML='Criar conta'
     }
   })
+function iniciarAutoAtualizacao() {
+  if (autoRefresh !== null) {
+    clearInterval(autoRefresh)
+  }
+
+  autoRefresh = setInterval(async function () {
+    try {
+      await carregar()
+    } catch (e) {
+      console.error(e)
+    }
+  }, 60000)
 }
 </script>
 </body>
