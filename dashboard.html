@@ -613,12 +613,22 @@ function donut(id,data){
   var ctx = document.getElementById(id)
   if(!ctx) return
 
-  // 🎯 Mapeamento de cores
-  const cores = Object.keys(data).map(k => {
-    if(k.toLowerCase().includes('conclu')) return '#2ecc71' // verde
-    if(k.toLowerCase().includes('pend')) return '#f1c40f'   // amarelo
-    return '#6c757d' // fallback (cinza)
-  })
+const palette = ['#2ecc71','#3498db','#00ffff','#f1c40f','#32cd32','rgba(0,0,0,0)']
+
+let idx = 0
+
+const cores = Object.keys(data).map(k => {
+  const key = k.toLowerCase()
+
+  if(key.includes('conclu')) return '#2ecc71' // verde
+  if(key.includes('pend')) return '#f1c40f'   // amarelo
+
+  // fallback sequencial
+  const cor = palette[idx % palette.length]
+  idx++
+  return cor
+})
+
 
   charts[id] = new Chart(ctx,{
     type:'doughnut',
