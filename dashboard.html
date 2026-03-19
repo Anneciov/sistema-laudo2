@@ -706,10 +706,17 @@ function donut(id,data){
       layout:{padding:{top:18}},
       scales:{
         x:{
-          ticks:{color:'#8b949e',font:{size:17,weight:'bold'}},
-          grid:{color:'#21262d'},
-          border:{color:'#21262d'}
-        },
+  ticks:{
+    color:'#2ecc71', // texto do eixo X
+    font:{size:17,weight:'bold'}
+  },
+  grid:{
+    color:'#2ecc71' // linhas do grid
+  },
+  border:{
+    color:'#2ecc71' // linha do eixo
+  }
+},
         y:{
           ticks:{color:'#8b949e',font:{size:15,weight:'bold'}},
           grid:{color:'#21262d'},
