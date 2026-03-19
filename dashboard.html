@@ -509,7 +509,7 @@ function desenharFilial(){
   var fm={}
   base.forEach(function(r){var f='F'+(r.Filial||'?');fm[f]=(fm[f]||0)+1})
   var sf=Object.entries(fm).sort(function(a,b){return b[1]-a[1]}).slice(0,15)
-  barraComLabels('cFilial',Object.fromEntries(sf),'#d29922')
+  barraComLabels('cFilial',Object.fromEntries(sf),'#64f5bb')
 }
 
 // ── SLA ───────────────────────────────────────────────────────
