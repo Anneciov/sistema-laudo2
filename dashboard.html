@@ -793,6 +793,13 @@ function ir(nome,el){
   el.classList.add('active')
   document.getElementById('pgTitle').textContent=secs[nome].title
   document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
+// ==============================
+// AUTO ATUALIZAÇÃO A CADA 1 MIN
+// ==============================
+setInterval(function(){
+  console.log('Atualizando dashboard automaticamente...')
+  reload()
+}, 60000) // 60000 ms = 1 minuto
 }
 </script>
 </body>
