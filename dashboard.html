@@ -607,24 +607,69 @@ function graficos(){
   })
 }
 
-function donut(id,data,colors){
-  if(charts[id])charts[id].destroy()
-  var ctx=document.getElementById(id);if(!ctx)return
-  charts[id]=new Chart(ctx,{type:'doughnut',
-    data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'right',labels:{color:'#8b949e',font:{size:12,family:'Inter'},padding:10,boxWidth:10}},
-        datalabels:{display:true,color:'#fff',font:{size:19,weight:'700'},formatter:function(v,ctx){var total=ctx.dataset.data.reduce(function(a,b){return a+b},0);var pct=Math.round(v/total*100);return pct>3?pct+'%':''}}}
-    }})
+function donut(id,data){
+  if(charts[id]) charts[id].destroy()
+  
+  var ctx = document.getElementById(id)
+  if(!ctx) return
+
+  // 🎯 Mapeamento de cores
+  const cores = Object.keys(data).map(k => {
+    if(k.toLowerCase().includes('conclu')) return '#2ecc71' // verde
+    if(k.toLowerCase().includes('pend')) return '#f1c40f'   // amarelo
+    return '#6c757d' // fallback (cinza)
+  })
+
+  charts[id] = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(data),
+      datasets:[{
+        data:Object.values(data),
+        backgroundColor:cores,
+        borderWidth:0,
+        hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:'65%',
+      plugins:{
+        legend:{
+          position:'right',
+          labels:{
+            color:'#8b949e',
+            font:{size:12,family:'Inter'},
+            padding:10,
+            boxWidth:10
+          }
+        },
+        datalabels:{
+          display:true,
+          color:'#fff',
+          font:{size:19,weight:'bold'},
+          formatter:function(v,ctx){
+            var total = ctx.dataset.data.reduce((a,b)=>a+b,0)
+            var pct = Math.round(v/total*100)
+            return pct>3 ? pct+'%' : ''
+          }
+        }
+      }
+    }
+  })
 }
 
-function barraComLabels(id,data,cor){
-  if(charts[id])charts[id].destroy()
+
+  function barraComLabels(id,data){
+  if(charts[id]) charts[id].destroy()
   
-  var ctx=document.getElementById(id);
-  if(!ctx)return
-  
-  charts[id]=new Chart(ctx,{
+  var ctx = document.getElementById(id)
+  if(!ctx) return
+
+  const cor = '#2ecc71' // 🟢 verde padrão
+
+  charts[id] = new Chart(ctx,{
     type:'bar',
     data:{
       labels:Object.keys(data),
@@ -647,36 +692,19 @@ function barraComLabels(id,data,cor){
           color:cor,
           anchor:'end',
           align:'top',
-          font:{
-            size:17,
-            weight:'bold' // ✅ NEGRITO
-          },
-          formatter:function(v){
-            return v
-          }
+          font:{size:17,weight:'bold'},
+          formatter:v => v
         }
       },
       layout:{padding:{top:18}},
       scales:{
         x:{
-          ticks:{
-            color:'#8b949e',
-            font:{
-              size:17,
-              weight:'bold' // ✅ NEGRITO eixo X
-            }
-          },
+          ticks:{color:'#8b949e',font:{size:17,weight:'bold'}},
           grid:{color:'#21262d'},
           border:{color:'#21262d'}
         },
         y:{
-          ticks:{
-            color:'#8b949e',
-            font:{
-              size:15,
-              weight:'bold' // ✅ NEGRITO eixo Y
-            }
-          },
+          ticks:{color:'#8b949e',font:{size:15,weight:'bold'}},
           grid:{color:'#21262d'},
           border:{color:'#21262d'}
         }
