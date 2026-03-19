@@ -793,6 +793,49 @@ function ir(nome,el){
   el.classList.add('active')
   document.getElementById('pgTitle').textContent=secs[nome].title
   document.getElementById('pgSub').innerHTML=secs[nome].sub+' · <span id="totalLabel">'+todos.length.toLocaleString('pt-BR')+' registros</span>'
+// ==============================
+// CONTROLE DE INTERVALO GLOBAL
+// ==============================
+let autoRefresh = null
+
+function ir(nome, el) {
+  document.querySelectorAll('.section').forEach(function(s){
+    s.classList.remove('active')
+  })
+
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.classList.remove('active')
+  })
+
+  document.getElementById(secs[nome].id).classList.add('active')
+  el.classList.add('active')
+
+  document.getElementById('pgTitle').textContent = secs[nome].title
+  document.getElementById('pgSub').innerHTML =
+    secs[nome].sub + ' · <span id="totalLabel">' +
+    todos.length.toLocaleString('pt-BR') + ' registros</span>'
+
+  iniciarAutoAtualizacao()
+}
+
+// ==============================
+// AUTO ATUALIZAÇÃO CONTROLADA
+// ==============================
+function iniciarAutoAtualizacao() {
+
+  // Evita múltiplos intervals
+  if (autoRefresh !== null) return
+
+  autoRefresh = setInterval(async function () {
+    console.log('Atualizando dashboard automaticamente...')
+
+    try {
+      await carregar()
+    } catch (e) {
+      console.error('Erro ao atualizar:', e)
+    }
+
+  }, 60000) // 1 minuto correto
 }
 </script>
 </body>
