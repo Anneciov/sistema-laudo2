@@ -587,7 +587,7 @@ function filtrar(){
     return true
   })
   pgPend=0;pgTodos=0;filtroAtivo=''
-  dadosTodos=filtrado.filter(function(r){var u=normalizar(r.Usuario||'');return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1})
+  dadosTodos=filtrado.filter(function(r){var u=normalizar(r.Usuario||'');return u.indexOf('ennecio')===-1&&u.indexOf('gleydson')===-1})
   atualizarBadgeFiltro()
   metricas();graficos();tabela('pend');tabela('todos')
 }
@@ -615,7 +615,7 @@ function filtroEspecial(tipo){
 }
 function limparFiltroEspecial(){
   filtroAtivo=''
-  dadosTodos=filtrado.filter(function(r){var u=normalizar(r.Usuario||'');return u.indexOf('annecio')===-1&&u.indexOf('gleydson')===-1})
+  dadosTodos=filtrado.filter(function(r){var u=normalizar(r.Usuario||'');return u.indexOf('annecioqq')===-1&&u.indexOf('gleydson')===-1})
   pgTodos=0;atualizarBadgeFiltro();tabela('todos')
   document.getElementById('btn-dev').style.opacity='1'
   document.getElementById('btn-qual').style.opacity='1'
