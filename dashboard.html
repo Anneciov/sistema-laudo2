@@ -294,6 +294,14 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
 .modal-sub{font-size:11px;color:var(--txt2);margin-top:3px;font-family:'JetBrains Mono',monospace}
 .modal-x{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px;transition:color 0.15s}
 .modal-x:hover{color:var(--txt)}
+.btn-sefaz{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:var(--r);border:1px solid rgba(47,129,247,0.4);
+  background:rgba(47,129,247,0.08);color:var(--acc);
+  font-size:12px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.2s;text-decoration:none;
+}
+.btn-sefaz:hover{background:rgba(47,129,247,0.18);border-color:var(--acc)}
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .di{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px}
 .dl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px}
@@ -443,7 +451,17 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
   <div class="modal">
     <div class="modal-top">
       <div><div class="modal-title" id="m-title">Detalhes</div><div class="modal-sub" id="m-sub"></div></div>
-      <button class="modal-x" onclick="fechar()">✕</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a id="m-sefaz-btn" href="#" target="_blank" rel="noopener" class="btn-sefaz" style="display:none">
+          📄 Consultar NF no SEFAZ
+        </a>
+        <button class="modal-x" onclick="fechar()">✕</button>
+      </div>
+    </div>
+    <div id="m-sefaz-info" style="display:none;margin-bottom:12px;padding:10px 12px;background:rgba(47,129,247,0.07);border:1px solid rgba(47,129,247,0.2);border-radius:var(--r);font-size:11px;color:var(--txt2);line-height:1.6">
+      🔑 <strong style="color:var(--acc)">Chave de Acesso necessária para download do PDF.</strong><br>
+      No portal SEFAZ, informe a <strong>Chave de Acesso de 44 dígitos</strong> da NF (disponível no TOTVS Protheus → NF-e → Consulta).<br>
+      <span style="color:var(--txt3)">NF Origem: <strong id="m-nf-num" style="color:var(--txt);font-family:'JetBrains Mono',monospace"></strong></span>
     </div>
     <div class="dg" id="m-body"></div>
   </div>
@@ -726,7 +744,24 @@ function abrir(r){
   var slaCalc=calcSLA(r),and=(r.Andamento||'').trim()
   var slaTexto=slaCalc!==null?slaCalc+'d ('+(and==='Concluído'?'encerrado':'em aberto')+')':'—'
   document.getElementById('m-title').textContent='Protocolo: '+(r.Protocolo||'—')
-  document.getElementById('m-sub').textContent='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)
+  document.getElementById('m-sub').innerHTML='NF: '+(r.NF_Origem||'—')+' · Filial: '+(r.Filial||'—')+' · '+badge(r.Andamento)
+
+  // Botão SEFAZ — só aparece se tiver NF_Origem
+  var nf=(r.NF_Origem||'').toString().trim()
+  var btnSefaz=document.getElementById('m-sefaz-btn')
+  var infoSefaz=document.getElementById('m-sefaz-info')
+  var nfNum=document.getElementById('m-nf-num')
+  if(nf){
+    // URL do portal nacional NF-e SEFAZ
+    btnSefaz.href='https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&tipoConteudo=7PhJ+gAVw2g='
+    btnSefaz.style.display='inline-flex'
+    infoSefaz.style.display='block'
+    nfNum.textContent=nf
+  } else {
+    btnSefaz.style.display='none'
+    infoSefaz.style.display='none'
+  }
+
   var campos=[['NF Origem',r.NF_Origem],['Filial',r.Filial],['Nome Cliente',r.Nome_Cliente],['Produto',r.Produto],['Armazém Destino',r.Amazem_Destino],['Temperatura',r.Temperatura_do_Produto],['Transportadora Dev.',r.Transportadora___Devolucao],['Transportadora Qual.',r.Transportadora_Qualidade],['Data Envio Qualidade',r.Data_Envio_para_Qualidade],['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],['Data Retorno Devolução',r.Data_Retorno_para_Devolucao],['Data Receb. Filial',r.Data_Recebimento_Filial],['Andamento',r.Andamento],['SLA Calculado',slaTexto],['Causa Raiz',r.Causa_Raiz],['Parecer Qualidade',r.Parecer_da_Qualidade],['Obs. Devolução',r.Observacao_Devolucao],['Obs. Qualidade',r.Observacao_Qualidade],['Usuário',r.Usuario],['Usuário Qualidade',r.Usuario_Qualidade],['Validação',r.Validacao]]
   document.getElementById('m-body').innerHTML=campos.map(function(p){return '<div class="di"><div class="dl">'+p[0]+'</div><div class="dv">'+(p[1]||'—')+'</div></div>'}).join('')
   document.getElementById('overlay').classList.add('open')
