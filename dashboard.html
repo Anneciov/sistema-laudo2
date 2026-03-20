@@ -1017,117 +1017,106 @@ function validarChave(inp){
   var btnPdf=document.getElementById('btn-dl-pdf')
   if(val.length===0){
     inp.style.borderColor='var(--b1)'
-    status.textContent='Cole ou digite a chave de acesso de 44 dígitos'
+    status.textContent='Cole ou digite a chave · Enter para baixar DANFE automaticamente'
     status.style.color='var(--txt3)'
   } else if(!ok){
     inp.style.borderColor='rgba(248,81,73,0.5)'
-    status.textContent='⚠ '+val.length+'/44 dígitos — continue digitando'
+    status.textContent='⚠ '+val.length+'/44 dígitos'
     status.style.color='var(--warn)'
   } else {
     inp.style.borderColor='rgba(63,185,80,0.5)'
-    var via=totvsConfigurado()?'via TOTVS Protheus':'via SEFAZ'
-    status.textContent='✅ Chave válida — download '+via
+    status.textContent='✅ Chave válida — pressione Enter ou clique em PDF / XML'
     status.style.color='var(--ok)'
+    // Enter automático após colar chave completa
+    inp.addEventListener('keydown',_onChaveEnter,{once:true})
   }
-  btnXml.disabled=!ok
-  btnXml.style.opacity=ok?'1':'0.4'
-  btnXml.style.cursor=ok?'pointer':'not-allowed'
-  btnPdf.disabled=!ok
-  btnPdf.style.opacity=ok?'1':'0.4'
-  btnPdf.style.cursor=ok?'pointer':'not-allowed'
+  btnXml.disabled=!ok; btnXml.style.opacity=ok?'1':'0.4'; btnXml.style.cursor=ok?'pointer':'not-allowed'
+  btnPdf.disabled=!ok; btnPdf.style.opacity=ok?'1':'0.4'; btnPdf.style.cursor=ok?'pointer':'not-allowed'
+}
+
+function _onChaveEnter(e){
+  if(e.key==='Enter'){
+    var val=document.getElementById('input-chave').value.replace(/\D/g,'')
+    if(val.length===44) _consultaDanfe(val,'pdf')
+  }
 }
 
 function baixarNF(tipo){
   var chave=document.getElementById('input-chave').value.replace(/\D/g,'')
   if(chave.length!==44){alert('Chave inválida.');return}
+
+  if(totvsConfigurado()){
+    _baixarTotvs(chave,tipo)
+  } else {
+    _consultaDanfe(chave,tipo)
+  }
+}
+
+// ── Download via TOTVS ────────────────────────────────────────
+function _baixarTotvs(chave,tipo){
   var st=document.getElementById('chave-status')
   var btnXml=document.getElementById('btn-dl-xml')
   var btnPdf=document.getElementById('btn-dl-pdf')
   btnXml.disabled=true;btnPdf.disabled=true
   btnXml.style.opacity='0.5';btnPdf.style.opacity='0.5'
-
-  var label=tipo==='pdf'?'DANFE PDF':'XML'
-  var ext=tipo==='pdf'?'.pdf':'.xml'
-  st.textContent='⏳ Baixando '+label+'...'
-  st.style.color='var(--acc)'
-
-  if(tipo==='pdf'){
-    // consultadanfe.com — submit do formulário via POST simulado
-    // A forma mais confiável: criar form e submeter direto para download
-    var form=document.createElement('form')
-    form.method='POST'
-    form.action='https://consultadanfe.com/download'
-    form.target='_blank'
-    form.style.display='none'
-    var inp=document.createElement('input')
-    inp.name='chave'; inp.value=chave
-    form.appendChild(inp)
-    document.body.appendChild(form)
-    form.submit()
-    document.body.removeChild(form)
-    st.textContent='✅ Download do DANFE iniciado!'
-    st.style.color='var(--ok)'
-    setTimeout(function(){
-      btnXml.disabled=false;btnPdf.disabled=false
-      btnXml.style.opacity='1';btnPdf.style.opacity='1'
-    },2000)
-
-  } else {
-    // XML via GET direto
-    var urlsXml=[
-      'https://consultadanfe.com/xml/'+chave,
-      'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?chNFe='+chave+'&tpAmb=1'
-    ]
-    tentarDownload(urlsXml,0,chave+'.xml','xml',st,btnXml,btnPdf)
-  }
+  var tpl=tipo==='pdf'?(_cfgTotvs.endpoint||'/rest/SPEDNFE/DANFE/{chave}'):(_cfgTotvs.endpointXml||'/rest/SPEDNFE/XML/{chave}')
+  var url=totvsBase()+tpl.replace('{chave}',chave)
+  st.textContent='⏳ Buscando no TOTVS...';st.style.color='var(--acc)'
+  fetch(url,{method:'GET',headers:totvsHeaders(),signal:AbortSignal.timeout(30000)})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob()})
+    .then(function(blob){
+      var a=document.createElement('a')
+      a.href=URL.createObjectURL(blob);a.download=chave+(tipo==='pdf'?'.pdf':'.xml')
+      document.body.appendChild(a);a.click();document.body.removeChild(a)
+      st.textContent='✅ Download concluído!';st.style.color='var(--ok)'
+    })
+    .catch(function(e){st.textContent='❌ Erro TOTVS: '+e.message;st.style.color='var(--err)'})
+    .finally(function(){setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2000)})
 }
 
-function tentarDownload(urls,idx,nomeArquivo,tipo,st,btnXml,btnPdf){
-  var reabilitar=function(){
-    setTimeout(function(){
-      btnXml.disabled=false;btnPdf.disabled=false
-      btnXml.style.opacity='1';btnPdf.style.opacity='1'
-    },2000)
-  }
+// ── Download via consultadanfe.com (popup com form POST) ──────
+function _consultaDanfe(chave,tipo){
+  var st=document.getElementById('chave-status')
+  var btnXml=document.getElementById('btn-dl-xml')
+  var btnPdf=document.getElementById('btn-dl-pdf')
+  btnXml.disabled=true;btnPdf.disabled=true
+  btnXml.style.opacity='0.5';btnPdf.style.opacity='0.5'
+  st.textContent='⏳ Abrindo consultadanfe.com...';st.style.color='var(--acc)'
 
-  if(idx>=urls.length){
-    var chave=nomeArquivo.replace('.pdf','').replace('.xml','')
-    // Fallback final: abre consultadanfe.com com chave já na URL
-    var urlSite='https://consultadanfe.com/?chave='+chave
-    window.open(urlSite,'_blank','noopener')
-    if(navigator.clipboard) navigator.clipboard.writeText(chave).catch(function(){})
-    st.textContent='🌐 Abrindo consultadanfe.com — chave copiada automaticamente'
+  // Abre popup e faz form POST para consultadanfe.com/CDanfe/preview
+  var popup=window.open('about:blank','danfe_'+Date.now(),'width=1000,height=750,scrollbars=yes,resizable=yes')
+  if(!popup||popup.closed){
+    st.textContent='⚠ Popup bloqueado — permita popups neste site e tente novamente'
     st.style.color='var(--warn)'
-    reabilitar()
+    btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'
     return
   }
 
-  fetch(urls[idx],{
-    method:'GET',
-    headers:{'Accept':tipo==='pdf'?'application/pdf,*/*':'application/xml,text/xml,*/*'},
-    signal:AbortSignal.timeout(15000)
-  })
-  .then(function(res){
-    if(!res.ok) throw new Error('HTTP '+res.status)
-    var ct=res.headers.get('content-type')||''
-    if(ct.includes('text/html')) throw new Error('HTML recebido')
-    return res.blob()
-  })
-  .then(function(blob){
-    if(blob.size<200) throw new Error('arquivo vazio')
-    var burl=URL.createObjectURL(blob)
-    var a=document.createElement('a')
-    a.href=burl; a.download=nomeArquivo
-    document.body.appendChild(a); a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(burl)
-    st.textContent='✅ '+(tipo==='pdf'?'DANFE':'XML')+' baixado com sucesso!'
-    st.style.color='var(--ok)'
-    reabilitar()
-  })
-  .catch(function(){
-    tentarDownload(urls,idx+1,nomeArquivo,tipo,st,btnXml,btnPdf)
-  })
+  // HTML da página de loading + form que auto-submete para consultadanfe.com
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Gerando DANFE...</title>'+
+  '<style>*{margin:0;padding:0;box-sizing:border-box}'+
+  'body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;height:100vh}'+
+  '.card{background:#fff;border-radius:16px;padding:48px 56px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:400px}'+
+  '.spin{width:48px;height:48px;border:5px solid #e2e8f0;border-top:5px solid #3b82f6;border-radius:50%;animation:s .8s linear infinite;margin:0 auto 20px}'+
+  '@keyframes s{to{transform:rotate(360deg)}}'+
+  'h2{color:#1e40af;font-size:20px;margin-bottom:8px}p{color:#64748b;font-size:14px}</style></head>'+
+  '<body><div class="card"><div class="spin"></div>'+
+  '<h2>Gerando '+( tipo==='pdf'?'DANFE PDF':'Arquivo XML')+'</h2>'+
+  '<p>Consultando os servidores fiscais...<br><small style="color:#94a3b8;margin-top:6px;display:block">Chave: '+chave.substring(0,10)+'...'+chave.substring(34)+'</small></p></div>'+
+  '<form id="f" method="POST" action="https://consultadanfe.com/CDanfe/preview" target="_self">'+
+  '<input type="hidden" name="chave_acesso" value="'+chave+'">'+
+  '<input type="hidden" name="tipo" value="'+(tipo==='pdf'?'pdf':'xml')+'">'+
+  '</form>'+
+  '<script>setTimeout(function(){document.getElementById("f").submit()},800)<\/script>'+
+  '</body></html>'
+
+  popup.document.open()
+  popup.document.write(html)
+  popup.document.close()
+
+  st.textContent='✅ Janela aberta — clique em "Baixar PDF" ou "Baixar XML"'
+  st.style.color='var(--ok)'
+  setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2500)
 }
 function fechar(){document.getElementById('overlay').classList.remove('open')}
 
