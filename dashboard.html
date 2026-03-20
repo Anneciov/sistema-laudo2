@@ -898,14 +898,45 @@ function baixarNF(tipo){
   '<h2>Gerando '+(tipo==='pdf'?'DANFE PDF':'Arquivo XML')+'</h2>'+
   '<p>Consultando os servidores fiscais...<br>'+
   '<small style="color:#94a3b8;margin-top:8px;display:block;font-family:monospace">'+chave.substring(0,10)+'...'+chave.substring(34)+'</small></p></div>'+
-  '<form id="f" method="POST" action="https://consultadanfe.com/CDanfe/preview" target="_self">'+
-  '<input type="hidden" name="chave_acesso" value="'+chave+'">'+
-  '<input type="hidden" name="tipo" value="'+(tipo==='pdf'?'pdf':'xml')+'">'+
+  '<form id="f" method="POST" action="https://consultadanfe.com/CDanfe/preview/use" target="_self">'+
+  '<input type="hidden" name="chave" value="'+chave+'">'+
   '</form>'+
-  '<script>setTimeout(function(){document.getElementById("f").submit()},600)<\/script>'+
+  '<script>'+
+  'setTimeout(function(){document.getElementById("f").submit()},400);'+
+  '<\/script>'+
   '</body></html>'
 
   popup.document.open();popup.document.write(html);popup.document.close()
+
+  // Tenta auto-clicar o botão de download após a página do consultadanfe carregar
+  // (funciona se o navegador não bloquear acesso cross-origin ao popup)
+  var tentativas=0
+  var monitor=setInterval(function(){
+    tentativas++
+    try{
+      var doc=popup.document
+      // Verifica se a página do consultadanfe já carregou (URL mudou)
+      if(popup.location&&popup.location.href&&popup.location.href.indexOf('consultadanfe.com')>-1){
+        // Tenta chamar DownPDF diretamente
+        if(tipo==='pdf'&&typeof popup.DownPDF==='function'){
+          popup.DownPDF()
+          clearInterval(monitor)
+          return
+        }
+        // Tenta clicar o botão PDF
+        var btnPDF=doc.querySelector('.btn-download-premium.pdf')
+        if(btnPDF){
+          btnPDF.click()
+          clearInterval(monitor)
+          return
+        }
+      }
+    }catch(e){
+      // Cross-origin bloqueado — normal, usuário clica manualmente
+    }
+    if(tentativas>20) clearInterval(monitor)
+  },500)
+
   st.textContent='✅ Janela aberta — clique em "Baixar PDF" ou "Baixar XML"'
   st.style.color='var(--ok)'
   setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2500)
