@@ -481,11 +481,11 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
       <!-- Campo chave de acesso -->
       <div style="padding:14px">
         <div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:8px">
-          🔑 Chave de Acesso (44 dígitos)
+          🔑 Chave de Acesso (44 dígitos) — cole aqui para baixar o XML/DANFE
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <input id="input-chave" type="text" maxlength="60"
-            placeholder="Cole a chave de 44 dígitos aqui..."
+            placeholder="00000000000000000000000000000000000000000000"
             oninput="validarChave(this)"
             onpaste="setTimeout(function(){validarChave(document.getElementById('input-chave'))},0)"
             style="flex:1;min-width:0;padding:8px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s;letter-spacing:0.5px">
@@ -499,68 +499,8 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
           </button>
         </div>
         <div id="chave-status" style="margin-top:6px;font-size:10px;color:var(--txt3)">
-          Cole ou digite a chave de acesso de 44 dígitos
+          Digite a chave de 44 dígitos para habilitar o download
         </div>
-
-        <!-- Config TOTVS colapsável -->
-        <div style="margin-top:12px;border-top:1px solid var(--b1);padding-top:10px">
-          <button onclick="toggleCfgTotvs()"
-            style="background:none;border:none;color:var(--txt3);font-size:10px;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:4px;padding:0;transition:color 0.15s"
-            onmouseover="this.style.color='var(--txt2)'" onmouseout="this.style.color='var(--txt3)'">
-            ⚙ Configurar TOTVS Protheus <span id="cfg-arrow">▼</span>
-          </button>
-          <div id="cfg-totvs-panel" style="display:none;margin-top:10px;padding:12px;background:var(--bg);border:1px solid var(--b1);border-radius:var(--r)">
-            <div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:10px">🔧 Configuração do servidor TOTVS Protheus</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-              <div>
-                <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">URL do servidor</div>
-                <input id="cfg-url" type="text" placeholder="https://erp.viveo.com.br"
-                  style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Porta REST</div>
-                <input id="cfg-port" type="text" placeholder="8080"
-                  style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Usuário TOTVS</div>
-                <input id="cfg-user" type="text" placeholder="admin"
-                  style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'Inter',sans-serif;outline:none">
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Senha</div>
-                <input id="cfg-pass" type="password" placeholder="••••••••"
-                  style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'Inter',sans-serif;outline:none">
-              </div>
-            </div>
-            <div style="margin-bottom:8px">
-              <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Endpoint REST do DANFE <span style="font-weight:400;text-transform:none;letter-spacing:0">(use {chave} como variável)</span></div>
-              <input id="cfg-endpoint" type="text" placeholder="/rest/SPEDNFE/DANFE/{chave}"
-                style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
-            </div>
-            <div style="margin-bottom:8px">
-              <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Endpoint REST do XML <span style="font-weight:400;text-transform:none;letter-spacing:0">(use {chave} como variável)</span></div>
-              <input id="cfg-endpoint-xml" type="text" placeholder="/rest/SPEDNFE/XML/{chave}"
-                style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <button onclick="salvarCfgTotvs()"
-                style="padding:6px 14px;background:rgba(47,129,247,0.15);border:1px solid rgba(47,129,247,0.4);border-radius:var(--r);color:var(--acc);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
-                💾 Salvar
-              </button>
-              <button onclick="testarTotvs()"
-                style="padding:6px 14px;background:rgba(61,201,176,0.1);border:1px solid rgba(61,201,176,0.3);border-radius:var(--r);color:var(--acc2);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
-                🔌 Testar conexão
-              </button>
-              <button onclick="limparCfgTotvs()"
-                style="padding:6px 14px;background:none;border:1px solid var(--b1);border-radius:var(--r);color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
-                🗑 Limpar
-              </button>
-              <span id="cfg-status" style="font-size:10px;color:var(--txt3)"></span>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
     <div class="dg" id="m-body"></div>
@@ -875,7 +815,6 @@ function abrir(r){
   var campos=[['NF Origem',r.NF_Origem],['Filial',r.Filial],['Nome Cliente',r.Nome_Cliente],['Produto',r.Produto],['Armazém Destino',r.Amazem_Destino],['Temperatura',r.Temperatura_do_Produto],['Transportadora Dev.',r.Transportadora___Devolucao],['Transportadora Qual.',r.Transportadora_Qualidade],['Data Envio Qualidade',r.Data_Envio_para_Qualidade],['Data Retorno Qualidade',r.Data_Retorno_da_Qualidade],['Data Retorno Devolução',r.Data_Retorno_para_Devolucao],['Data Receb. Filial',r.Data_Recebimento_Filial],['Andamento',r.Andamento],['SLA Calculado',slaTexto],['Causa Raiz',r.Causa_Raiz],['Parecer Qualidade',r.Parecer_da_Qualidade],['Obs. Devolução',r.Observacao_Devolucao],['Obs. Qualidade',r.Observacao_Qualidade],['Usuário',r.Usuario],['Usuário Qualidade',r.Usuario_Qualidade],['Validação',r.Validacao]]
   document.getElementById('m-body').innerHTML=campos.map(function(p){return '<div class="di"><div class="dl">'+p[0]+'</div><div class="dv">'+(p[1]||'—')+'</div></div>'}).join('')
   document.getElementById('overlay').classList.add('open')
-  carregarCfgTotvs()
 }
 
 function copiarNF(){
@@ -897,118 +836,8 @@ function copiarNF(){
   }
 }
 
-// ── CONFIG TOTVS (salva em localStorage) ─────────────────────
-var _cfgTotvs={
-  url:'https://erp.viveo.com.br',
-  port:'8080',
-  user:'',
-  pass:'',
-  endpoint:'/rest/SPEDNFE/DANFE/{chave}',
-  endpointXml:'/rest/SPEDNFE/XML/{chave}'
-}
-
-function carregarCfgTotvs(){
-  try{
-    var s=localStorage.getItem('totvs_cfg')
-    if(s){
-      var saved=JSON.parse(s)
-      // Mescla com padrão — mantém URL/porta da Viveo se não foi alterada
-      _cfgTotvs=Object.assign({url:'https://erp.viveo.com.br',port:'8080',endpoint:'/rest/SPEDNFE/DANFE/{chave}',endpointXml:'/rest/SPEDNFE/XML/{chave}'},saved)
-    }
-  }catch(e){}
-  document.getElementById('cfg-url').value=_cfgTotvs.url||'https://erp.viveo.com.br'
-  document.getElementById('cfg-port').value=_cfgTotvs.port||'8080'
-  document.getElementById('cfg-user').value=_cfgTotvs.user||''
-  document.getElementById('cfg-pass').value=_cfgTotvs.pass||''
-  document.getElementById('cfg-endpoint').value=_cfgTotvs.endpoint||'/rest/SPEDNFE/DANFE/{chave}'
-  document.getElementById('cfg-endpoint-xml').value=_cfgTotvs.endpointXml||'/rest/SPEDNFE/XML/{chave}'
-}
-
-function salvarCfgTotvs(){
-  _cfgTotvs={
-    url: document.getElementById('cfg-url').value.trim().replace(/\/$/,''),
-    port: document.getElementById('cfg-port').value.trim(),
-    user: document.getElementById('cfg-user').value.trim(),
-    pass: document.getElementById('cfg-pass').value,
-    endpoint: document.getElementById('cfg-endpoint').value.trim()||'/rest/SPEDNFE/DANFE/{chave}',
-    endpointXml: document.getElementById('cfg-endpoint-xml').value.trim()||'/rest/SPEDNFE/XML/{chave}'
-  }
-  try{localStorage.setItem('totvs_cfg',JSON.stringify(_cfgTotvs))}catch(e){}
-  var st=document.getElementById('cfg-status')
-  st.textContent='✅ Salvo!'
-  st.style.color='var(--ok)'
-  setTimeout(function(){st.textContent='';},2500)
-}
-
-function limparCfgTotvs(){
-  try{localStorage.removeItem('totvs_cfg')}catch(e){}
-  _cfgTotvs={url:'',port:'',user:'',pass:'',endpoint:'/rest/SPEDNFE/DANFE/{chave}',endpointXml:'/rest/SPEDNFE/XML/{chave}'}
-  document.getElementById('cfg-url').value=''
-  document.getElementById('cfg-port').value=''
-  document.getElementById('cfg-user').value=''
-  document.getElementById('cfg-pass').value=''
-  document.getElementById('cfg-endpoint').value='/rest/SPEDNFE/DANFE/{chave}'
-  document.getElementById('cfg-endpoint-xml').value='/rest/SPEDNFE/XML/{chave}'
-  var st=document.getElementById('cfg-status')
-  st.textContent='🗑 Configuração removida'
-  st.style.color='var(--txt3)'
-  setTimeout(function(){st.textContent=''},2500)
-}
-
-function toggleCfgTotvs(){
-  var p=document.getElementById('cfg-totvs-panel')
-  var a=document.getElementById('cfg-arrow')
-  var aberto=p.style.display!=='none'
-  p.style.display=aberto?'none':'block'
-  a.textContent=aberto?'▼':'▲'
-  if(!aberto) carregarCfgTotvs()
-}
-
-function testarTotvs(){
-  var st=document.getElementById('cfg-status')
-  var base=document.getElementById('cfg-url').value.trim().replace(/\/$/,'')
-  var port=document.getElementById('cfg-port').value.trim()
-  if(!base){st.textContent='⚠ Informe a URL do servidor';st.style.color='var(--warn)';return}
-  // Testa o endpoint raiz do REST Protheus
-  var url=base+(port?':'+port:'')+'/rest'
-  st.textContent='🔌 Testando...'
-  st.style.color='var(--acc)'
-  var user=document.getElementById('cfg-user').value.trim()
-  var pass=document.getElementById('cfg-pass').value
-  var headers={'Content-Type':'application/json'}
-  if(user) headers['Authorization']='Basic '+btoa(user+':'+pass)
-  fetch(url,{method:'GET',headers:headers,signal:AbortSignal.timeout(8000)})
-    .then(function(r){
-      if(r.ok||r.status===401||r.status===404||r.status===405){
-        var msg=r.status===401?'⚠ Servidor OK — credenciais inválidas':r.status===404?'✅ Servidor acessível (ajuste o endpoint)':'✅ Servidor acessível ('+r.status+')'
-        st.textContent=msg
-        st.style.color=r.status===401?'var(--warn)':'var(--ok)'
-      } else {
-        st.textContent='⚠ Servidor respondeu: HTTP '+r.status
-        st.style.color='var(--warn)'
-      }
-    })
-    .catch(function(){
-      st.textContent='❌ Sem resposta — verifique se está na rede da empresa (VPN)'
-      st.style.color='var(--err)'
-    })
-}
-
-function totvsBase(){
-  var b=_cfgTotvs.url||''
-  var p=_cfgTotvs.port||''
-  return b+(p?':'+p:'')
-}
-function totvsHeaders(){
-  var h={'Content-Type':'application/json','Accept':'application/pdf,application/xml,*/*'}
-  if(_cfgTotvs.user) h['Authorization']='Basic '+btoa(_cfgTotvs.user+':'+(_cfgTotvs.pass||''))
-  return h
-}
-function totvsConfigurado(){
-  return !!(_cfgTotvs.url&&_cfgTotvs.url.trim())
-}
-
 function validarChave(inp){
+  // Remove tudo que não for dígito (inclui espaços do paste)
   var val=inp.value.replace(/\D/g,'')
   inp.value=val
   var ok=val.length===44
@@ -1025,8 +854,7 @@ function validarChave(inp){
     status.style.color='var(--warn)'
   } else {
     inp.style.borderColor='rgba(63,185,80,0.5)'
-    var via=totvsConfigurado()?'via TOTVS Protheus':'via SEFAZ'
-    status.textContent='✅ Chave válida — download '+via
+    status.textContent='✅ Chave válida — pronto para baixar!'
     status.style.color='var(--ok)'
   }
   btnXml.disabled=!ok
@@ -1039,64 +867,95 @@ function validarChave(inp){
 
 function baixarNF(tipo){
   var chave=document.getElementById('input-chave').value.replace(/\D/g,'')
-  if(chave.length!==44){alert('Chave inválida.');return}
+  if(chave.length!==44){alert('Chave de acesso inválida.');return}
   var st=document.getElementById('chave-status')
   var btnXml=document.getElementById('btn-dl-xml')
   var btnPdf=document.getElementById('btn-dl-pdf')
+
+  // Desabilita botões durante download
   btnXml.disabled=true;btnPdf.disabled=true
   btnXml.style.opacity='0.5';btnPdf.style.opacity='0.5'
+  st.textContent='⏳ Baixando...'
+  st.style.color='var(--acc)'
 
-  if(totvsConfigurado()){
-    // ── Download via TOTVS Protheus ──────────────────────────
-    var endpointTemplate = tipo==='pdf' ? (_cfgTotvs.endpoint||'/rest/SPEDNFE/DANFE/{chave}') : (_cfgTotvs.endpointXml||'/rest/SPEDNFE/XML/{chave}')
-    var endpoint=endpointTemplate.replace('{chave}',chave)
-    var url=totvsBase()+endpoint
-    var ext=tipo==='pdf'?'.pdf':'.xml'
-    var label=tipo==='pdf'?'DANFE':'XML'
-    st.textContent='⏳ Buscando '+label+' no TOTVS...'
-    st.style.color='var(--acc)'
+  if(tipo==='xml'){
+    // Download XML direto via SEFAZ — sem abrir portal
+    var url='https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?chNFe='+chave+'&tpAmb=1'
+    fetch(url,{method:'GET',mode:'no-cors'})
+    // Como SEFAZ bloqueia CORS, usa download via link oculto
+    var a=document.createElement('a')
+    a.href=url
+    a.download=chave+'.xml'
+    a.style.display='none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    st.textContent='✅ Download do XML iniciado!'
+    st.style.color='var(--ok)'
 
-    fetch(url,{method:'GET',headers:totvsHeaders(),signal:AbortSignal.timeout(30000)})
-      .then(function(r){
-        if(!r.ok) throw new Error('HTTP '+r.status+' — verifique endpoint e credenciais')
-        return r.blob()
+  } else {
+    // DANFE PDF — usa serviço público gratuito de DANFE por chave
+    // Tenta API pública de geração de DANFE
+    var urlDanfe='https://danfe.nfe.io/'+chave+'.pdf'
+    var urlFallback='https://api.danfe.com.br/danfe/'+chave
+
+    // Tenta download direto via fetch para blob
+    st.textContent='⏳ Gerando DANFE...'
+    fetch(urlDanfe)
+      .then(function(res){
+        if(!res.ok) throw new Error('falhou')
+        return res.blob()
       })
       .then(function(blob){
         var burl=URL.createObjectURL(blob)
         var a=document.createElement('a')
-        a.href=burl;a.download=chave+ext
+        a.href=burl;a.download=chave+'.pdf'
         document.body.appendChild(a);a.click()
         document.body.removeChild(a)
         URL.revokeObjectURL(burl)
-        st.textContent='✅ '+label+' baixado com sucesso!'
+        st.textContent='✅ DANFE baixado com sucesso!'
         st.style.color='var(--ok)'
       })
-      .catch(function(e){
-        st.textContent='❌ Erro TOTVS: '+e.message
-        st.style.color='var(--err)'
+      .catch(function(){
+        // Fallback: tenta outro serviço
+        fetch(urlFallback)
+          .then(function(res){
+            if(!res.ok) throw new Error('falhou2')
+            return res.blob()
+          })
+          .then(function(blob){
+            var burl=URL.createObjectURL(blob)
+            var a=document.createElement('a')
+            a.href=burl;a.download=chave+'.pdf'
+            document.body.appendChild(a);a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(burl)
+            st.textContent='✅ DANFE baixado com sucesso!'
+            st.style.color='var(--ok)'
+          })
+          .catch(function(){
+            // Último fallback: link direto
+            var a=document.createElement('a')
+            a.href=urlDanfe;a.download=chave+'.pdf';a.target='_blank'
+            document.body.appendChild(a);a.click();document.body.removeChild(a)
+            st.textContent='⬇ Download iniciado (pode abrir em nova aba)'
+            st.style.color='var(--acc)'
+          })
       })
       .finally(function(){
-        setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2000)
+        setTimeout(function(){
+          btnXml.disabled=false;btnPdf.disabled=false
+          btnXml.style.opacity='1';btnPdf.style.opacity='1'
+        },2000)
       })
-
-  } else {
-    // ── Fallback: download via link SEFAZ (sem TOTVS configurado) ──
-    st.textContent='⚠ TOTVS não configurado — usando link SEFAZ direto'
-    st.style.color='var(--warn)'
-    var ext2=tipo==='pdf'?'.pdf':'.xml'
-    var urlSefaz=tipo==='pdf'
-      ?'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&tipoConteudo=7PhJ+gAVw2g=&nfe='+chave
-      :'https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?chNFe='+chave+'&tpAmb=1'
-    var a=document.createElement('a')
-    a.href=urlSefaz;a.download=chave+ext2;a.target='_blank'
-    document.body.appendChild(a);a.click();document.body.removeChild(a)
-    setTimeout(function(){
-      btnXml.disabled=false;btnPdf.disabled=false
-      btnXml.style.opacity='1';btnPdf.style.opacity='1'
-      var via=tipo==='pdf'?'Portal SEFAZ aberto — configure TOTVS para download direto':'Download XML iniciado'
-      st.textContent=via;st.style.color='var(--txt3)'
-    },1500)
+    return
   }
+
+  // Reabilita botões após XML
+  setTimeout(function(){
+    btnXml.disabled=false;btnPdf.disabled=false
+    btnXml.style.opacity='1';btnPdf.style.opacity='1'
+  },2000)
 }
 function fechar(){document.getElementById('overlay').classList.remove('open')}
 
