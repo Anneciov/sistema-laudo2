@@ -484,9 +484,10 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
           🔑 Chave de Acesso (44 dígitos) — cole aqui para baixar o XML/DANFE
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input id="input-chave" type="text" maxlength="44"
+          <input id="input-chave" type="text" maxlength="60"
             placeholder="00000000000000000000000000000000000000000000"
             oninput="validarChave(this)"
+            onpaste="setTimeout(function(){validarChave(document.getElementById('input-chave'))},0)"
             style="flex:1;min-width:0;padding:8px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s;letter-spacing:0.5px">
           <button id="btn-dl-xml" onclick="baixarNF('xml')" disabled
             style="padding:8px 14px;background:rgba(61,201,176,0.1);border:1px solid rgba(61,201,176,0.3);border-radius:var(--r);color:var(--acc2);font-size:12px;font-weight:600;cursor:not-allowed;opacity:0.4;font-family:'Inter',sans-serif;transition:all 0.2s;white-space:nowrap">
@@ -836,6 +837,7 @@ function copiarNF(){
 }
 
 function validarChave(inp){
+  // Remove tudo que não for dígito (inclui espaços do paste)
   var val=inp.value.replace(/\D/g,'')
   inp.value=val
   var ok=val.length===44
@@ -844,7 +846,7 @@ function validarChave(inp){
   var btnPdf=document.getElementById('btn-dl-pdf')
   if(val.length===0){
     inp.style.borderColor='var(--b1)'
-    status.textContent='Digite a chave de 44 dígitos para habilitar o download'
+    status.textContent='Cole ou digite a chave de acesso de 44 dígitos'
     status.style.color='var(--txt3)'
   } else if(!ok){
     inp.style.borderColor='rgba(248,81,73,0.5)'
@@ -865,31 +867,95 @@ function validarChave(inp){
 
 function baixarNF(tipo){
   var chave=document.getElementById('input-chave').value.replace(/\D/g,'')
-  if(chave.length!==44){alert('Chave de acesso inválida. Verifique e tente novamente.');return}
+  if(chave.length!==44){alert('Chave de acesso inválida.');return}
   var st=document.getElementById('chave-status')
+  var btnXml=document.getElementById('btn-dl-xml')
+  var btnPdf=document.getElementById('btn-dl-pdf')
+
+  // Desabilita botões durante download
+  btnXml.disabled=true;btnPdf.disabled=true
+  btnXml.style.opacity='0.5';btnPdf.style.opacity='0.5'
+  st.textContent='⏳ Baixando...'
+  st.style.color='var(--acc)'
+
   if(tipo==='xml'){
-    // Tentativa de download direto do XML via SEFAZ
+    // Download XML direto via SEFAZ — sem abrir portal
     var url='https://www.nfe.fazenda.gov.br/portal/downloadNFe.aspx?chNFe='+chave+'&tpAmb=1'
-    var a=document.createElement('a');a.href=url;a.download=chave+'.xml';a.target='_blank'
-    document.body.appendChild(a);a.click();document.body.removeChild(a)
-    st.textContent='⬇ Iniciando download do XML...'
-    st.style.color='var(--acc2)'
+    fetch(url,{method:'GET',mode:'no-cors'})
+    // Como SEFAZ bloqueia CORS, usa download via link oculto
+    var a=document.createElement('a')
+    a.href=url
+    a.download=chave+'.xml'
+    a.style.display='none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    st.textContent='✅ Download do XML iniciado!'
+    st.style.color='var(--ok)'
+
   } else {
-    // PDF/DANFE — abre portal SEFAZ com chave pré-informada e copia chave automaticamente
-    var url='https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&tipoConteudo=7PhJ+gAVw2g=&nfe='+chave
-    window.open(url,'_blank','noopener')
-    // Copia a chave automaticamente para facilitar o paste no SEFAZ
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(chave).then(function(){
-        st.textContent='🌐 Portal aberto + 📋 Chave copiada! Cole no campo de busca do SEFAZ.'
-        st.style.color='var(--acc)'
-        setTimeout(function(){st.textContent='✅ Chave válida — pronto para baixar!';st.style.color='var(--ok)'},5000)
+    // DANFE PDF — usa serviço público gratuito de DANFE por chave
+    // Tenta API pública de geração de DANFE
+    var urlDanfe='https://danfe.nfe.io/'+chave+'.pdf'
+    var urlFallback='https://api.danfe.com.br/danfe/'+chave
+
+    // Tenta download direto via fetch para blob
+    st.textContent='⏳ Gerando DANFE...'
+    fetch(urlDanfe)
+      .then(function(res){
+        if(!res.ok) throw new Error('falhou')
+        return res.blob()
       })
-    } else {
-      st.textContent='🌐 Portal SEFAZ aberto em nova aba.'
-      st.style.color='var(--acc)'
-    }
+      .then(function(blob){
+        var burl=URL.createObjectURL(blob)
+        var a=document.createElement('a')
+        a.href=burl;a.download=chave+'.pdf'
+        document.body.appendChild(a);a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(burl)
+        st.textContent='✅ DANFE baixado com sucesso!'
+        st.style.color='var(--ok)'
+      })
+      .catch(function(){
+        // Fallback: tenta outro serviço
+        fetch(urlFallback)
+          .then(function(res){
+            if(!res.ok) throw new Error('falhou2')
+            return res.blob()
+          })
+          .then(function(blob){
+            var burl=URL.createObjectURL(blob)
+            var a=document.createElement('a')
+            a.href=burl;a.download=chave+'.pdf'
+            document.body.appendChild(a);a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(burl)
+            st.textContent='✅ DANFE baixado com sucesso!'
+            st.style.color='var(--ok)'
+          })
+          .catch(function(){
+            // Último fallback: link direto
+            var a=document.createElement('a')
+            a.href=urlDanfe;a.download=chave+'.pdf';a.target='_blank'
+            document.body.appendChild(a);a.click();document.body.removeChild(a)
+            st.textContent='⬇ Download iniciado (pode abrir em nova aba)'
+            st.style.color='var(--acc)'
+          })
+      })
+      .finally(function(){
+        setTimeout(function(){
+          btnXml.disabled=false;btnPdf.disabled=false
+          btnXml.style.opacity='1';btnPdf.style.opacity='1'
+        },2000)
+      })
+    return
   }
+
+  // Reabilita botões após XML
+  setTimeout(function(){
+    btnXml.disabled=false;btnPdf.disabled=false
+    btnXml.style.opacity='1';btnPdf.style.opacity='1'
+  },2000)
 }
 function fechar(){document.getElementById('overlay').classList.remove('open')}
 
