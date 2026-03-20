@@ -535,12 +535,12 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
             </div>
             <div style="margin-bottom:8px">
               <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Endpoint REST do DANFE <span style="font-weight:400;text-transform:none;letter-spacing:0">(use {chave} como variável)</span></div>
-              <input id="cfg-endpoint" type="text" placeholder="/rest/SPEDNFE/DANFE/{chave}"
+              <input id="cfg-endpoint" type="text" placeholder="/rest/DANFE/NFe/{chave}"
                 style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
             </div>
             <div style="margin-bottom:8px">
               <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Endpoint REST do XML <span style="font-weight:400;text-transform:none;letter-spacing:0">(use {chave} como variável)</span></div>
-              <input id="cfg-endpoint-xml" type="text" placeholder="/rest/SPEDNFE/XML/{chave}"
+              <input id="cfg-endpoint-xml" type="text" placeholder="/rest/NFe/XML/{chave}"
                 style="width:100%;padding:6px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--txt);font-size:11px;font-family:'JetBrains Mono',monospace;outline:none">
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -551,6 +551,10 @@ tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
               <button onclick="testarTotvs()"
                 style="padding:6px 14px;background:rgba(61,201,176,0.1);border:1px solid rgba(61,201,176,0.3);border-radius:var(--r);color:var(--acc2);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
                 🔌 Testar conexão
+              </button>
+              <button onclick="descobrirEndpoints()"
+                style="padding:6px 14px;background:rgba(188,140,255,0.1);border:1px solid rgba(188,140,255,0.3);border-radius:var(--r);color:var(--pur);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
+                🔍 Descobrir endpoints
               </button>
               <button onclick="limparCfgTotvs()"
                 style="padding:6px 14px;background:none;border:1px solid var(--b1);border-radius:var(--r);color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">
@@ -903,8 +907,8 @@ var _cfgTotvs={
   port:'8080',
   user:'',
   pass:'',
-  endpoint:'/rest/SPEDNFE/DANFE/{chave}',
-  endpointXml:'/rest/SPEDNFE/XML/{chave}'
+  endpoint:'/rest/DANFE/NFe/{chave}',
+  endpointXml:'/rest/NFe/XML/{chave}'
 }
 
 function carregarCfgTotvs(){
@@ -912,16 +916,15 @@ function carregarCfgTotvs(){
     var s=localStorage.getItem('totvs_cfg')
     if(s){
       var saved=JSON.parse(s)
-      // Mescla com padrão — mantém URL/porta da Viveo se não foi alterada
-      _cfgTotvs=Object.assign({url:'https://erp.viveo.com.br',port:'8080',endpoint:'/rest/SPEDNFE/DANFE/{chave}',endpointXml:'/rest/SPEDNFE/XML/{chave}'},saved)
+      _cfgTotvs=Object.assign({url:'https://erp.viveo.com.br',port:'8080',endpoint:'/rest/DANFE/NFe/{chave}',endpointXml:'/rest/NFe/XML/{chave}'},saved)
     }
   }catch(e){}
   document.getElementById('cfg-url').value=_cfgTotvs.url||'https://erp.viveo.com.br'
   document.getElementById('cfg-port').value=_cfgTotvs.port||'8080'
   document.getElementById('cfg-user').value=_cfgTotvs.user||''
   document.getElementById('cfg-pass').value=_cfgTotvs.pass||''
-  document.getElementById('cfg-endpoint').value=_cfgTotvs.endpoint||'/rest/SPEDNFE/DANFE/{chave}'
-  document.getElementById('cfg-endpoint-xml').value=_cfgTotvs.endpointXml||'/rest/SPEDNFE/XML/{chave}'
+  document.getElementById('cfg-endpoint').value=_cfgTotvs.endpoint||'/rest/DANFE/NFe/{chave}'
+  document.getElementById('cfg-endpoint-xml').value=_cfgTotvs.endpointXml||'/rest/NFe/XML/{chave}'
 }
 
 function salvarCfgTotvs(){
@@ -968,30 +971,45 @@ function testarTotvs(){
   var st=document.getElementById('cfg-status')
   var base=document.getElementById('cfg-url').value.trim().replace(/\/$/,'')
   var port=document.getElementById('cfg-port').value.trim()
-  if(!base){st.textContent='⚠ Informe a URL do servidor';st.style.color='var(--warn)';return}
-  // Testa o endpoint raiz do REST Protheus
-  var url=base+(port?':'+port:'')+'/rest'
-  st.textContent='🔌 Testando...'
-  st.style.color='var(--acc)'
   var user=document.getElementById('cfg-user').value.trim()
   var pass=document.getElementById('cfg-pass').value
-  var headers={'Content-Type':'application/json'}
+  if(!base){st.textContent='⚠ Informe a URL do servidor';st.style.color='var(--warn)';return}
+  var baseUrl=base+(port?':'+port:'')
+  var headers={'Content-Type':'application/json','Accept':'application/json'}
   if(user) headers['Authorization']='Basic '+btoa(user+':'+pass)
-  fetch(url,{method:'GET',headers:headers,signal:AbortSignal.timeout(8000)})
-    .then(function(r){
-      if(r.ok||r.status===401||r.status===404||r.status===405){
-        var msg=r.status===401?'⚠ Servidor OK — credenciais inválidas':r.status===404?'✅ Servidor acessível (ajuste o endpoint)':'✅ Servidor acessível ('+r.status+')'
-        st.textContent=msg
-        st.style.color=r.status===401?'var(--warn)':'var(--ok)'
-      } else {
-        st.textContent='⚠ Servidor respondeu: HTTP '+r.status
-        st.style.color='var(--warn)'
-      }
-    })
-    .catch(function(){
-      st.textContent='❌ Sem resposta — verifique se está na rede da empresa (VPN)'
-      st.style.color='var(--err)'
-    })
+  st.textContent='🔌 Testando conexão REST...';st.style.color='var(--acc)'
+
+  // Testa endpoint REST raiz do Protheus
+  var endpoints=[
+    baseUrl+'/rest',
+    baseUrl+'/rest/api/swagger/index.html',
+    baseUrl+'/rest/DANFE',
+    base+':'+port+'/rest'
+  ]
+  var tentativas=0
+  function testar(i){
+    if(i>=endpoints.length){
+      st.textContent='❌ REST não respondeu — verifique porta e se o serviço REST está ativo no Protheus'
+      st.style.color='var(--err)'; return
+    }
+    fetch(endpoints[i],{method:'GET',headers:headers,signal:AbortSignal.timeout(5000)})
+      .then(function(r){
+        if(r.status===401){
+          st.textContent='⚠ Servidor OK — usuário/senha incorretos (HTTP 401)'
+          st.style.color='var(--warn)'
+        } else if(r.ok||r.status===404||r.status===405||r.status===403){
+          st.textContent='✅ REST acessível! (HTTP '+r.status+') · Endpoint: '+endpoints[i]
+          st.style.color='var(--ok)'
+          // Salva o endpoint base que funcionou
+          var epBase=endpoints[i].replace('/rest/api/swagger/index.html','').replace('/rest/DANFE','').replace('/rest','')
+          document.getElementById('cfg-url').value=epBase.replace(':'+port,'')
+        } else {
+          testar(i+1)
+        }
+      })
+      .catch(function(){testar(i+1)})
+  }
+  testar(0)
 }
 
 function totvsBase(){
@@ -1118,6 +1136,62 @@ function _consultaDanfe(chave,tipo){
   st.style.color='var(--ok)'
   setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2500)
 }
+function descobrirEndpoints(){
+  var st=document.getElementById('cfg-status')
+  var base=document.getElementById('cfg-url').value.trim().replace(/\/$/,'')
+  var port=document.getElementById('cfg-port').value.trim()
+  var user=document.getElementById('cfg-user').value.trim()
+  var pass=document.getElementById('cfg-pass').value
+  if(!base){st.textContent='⚠ Informe a URL';st.style.color='var(--warn)';return}
+  var baseUrl=base+(port?':'+port:'')
+  var headers={'Accept':'*/*'}
+  if(user) headers['Authorization']='Basic '+btoa(user+':'+pass)
+
+  // Endpoints DANFE mais comuns no Protheus
+  var candidatos=[
+    '/rest/DANFE/NFe/{chave}',
+    '/rest/nfe/danfe/{chave}',
+    '/rest/SPEDNFE/DANFE/{chave}',
+    '/rest/v1/nfe/{chave}/danfe',
+    '/rest/NFeUtils/DANFE?chave={chave}',
+    '/rest/DANFE?chave={chave}',
+    '/rest/fis/nfe/danfe/{chave}',
+    '/rest/NF/DANFE/{chave}'
+  ]
+  // Usa uma chave de teste fictícia
+  var chaveTest='35260112420164000580550010004133721576691123'
+  st.textContent='🔍 Testando '+candidatos.length+' endpoints...';st.style.color='var(--acc)'
+
+  var encontrado=false
+  var pendentes=candidatos.length
+  candidatos.forEach(function(ep){
+    var url=baseUrl+ep.replace('{chave}',chaveTest)
+    fetch(url,{method:'GET',headers:headers,signal:AbortSignal.timeout(6000)})
+      .then(function(r){
+        pendentes--
+        var ct=r.headers.get('content-type')||''
+        // Endpoint válido = retorna PDF, XML, ou JSON (não HTML de erro)
+        if(!encontrado&&(r.ok||r.status===403)&&!ct.includes('text/html')){
+          encontrado=true
+          document.getElementById('cfg-endpoint').value=ep
+          document.getElementById('cfg-endpoint-xml').value=ep.replace('DANFE','XML').replace('danfe','xml').replace('pdf','xml')
+          st.textContent='✅ Endpoint encontrado: '+ep+' (HTTP '+r.status+')'
+          st.style.color='var(--ok)'
+        } else if(!encontrado&&pendentes===0){
+          st.textContent='⚠ Nenhum padrão automático encontrado — informe o endpoint manualmente'
+          st.style.color='var(--warn)'
+        }
+      })
+      .catch(function(){
+        pendentes--
+        if(!encontrado&&pendentes===0){
+          st.textContent='⚠ Servidor não respondeu — verifique se está na rede/VPN da Viveo'
+          st.style.color='var(--err)'
+        }
+      })
+  })
+}
+
 function fechar(){document.getElementById('overlay').classList.remove('open')}
 
 // ── NAVEGAÇÃO ─────────────────────────────────────────────────
