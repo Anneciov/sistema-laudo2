@@ -836,30 +836,42 @@ function copiarNF(){
   }
 }
 
-// ── Download via consultadanfe.com (popup com form POST) ──────
+// ── DANFE — Edge Function (download direto) + popup fallback ─────
+var EDGE_URL='https://jsppfrdhkekkkjemkzju.supabase.co/functions/v1/danfe-proxy'
+var ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzcHBmcmRoa2Vra2tqZW1remp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTc2MDIsImV4cCI6MjA4OTE3MzYwMn0.okK6pdZdhIcj9L_sLvLsc-iVnU_irisJoF1dDlSMbGg'
+
+function setStatus(txt,cor){
+  var el=document.getElementById('chave-status')
+  if(el){el.textContent=txt;el.style.color=cor}
+}
+function setBtns(disabled){
+  ['btn-dl-xml','btn-dl-pdf'].forEach(function(id){
+    var b=document.getElementById(id)
+    if(!b)return
+    b.disabled=disabled
+    b.style.opacity=disabled?'0.4':'1'
+    b.style.cursor=disabled?'not-allowed':'pointer'
+  })
+}
+
 function validarChave(inp){
   var val=inp.value.replace(/\D/g,'')
   inp.value=val
   var ok=val.length===44
-  var status=document.getElementById('chave-status')
-  var btnXml=document.getElementById('btn-dl-xml')
-  var btnPdf=document.getElementById('btn-dl-pdf')
   if(val.length===0){
     inp.style.borderColor='var(--b1)'
-    status.textContent='Cole ou digite a chave · Enter para baixar DANFE automaticamente'
-    status.style.color='var(--txt3)'
+    setStatus('Cole ou digite a chave · Enter baixa o DANFE automaticamente','var(--txt3)')
   } else if(!ok){
     inp.style.borderColor='rgba(248,81,73,0.5)'
-    status.textContent='⚠ '+val.length+'/44 dígitos'
-    status.style.color='var(--warn)'
+    setStatus('⚠ '+val.length+'/44 dígitos','var(--warn)')
   } else {
     inp.style.borderColor='rgba(63,185,80,0.5)'
-    status.textContent='✅ Chave válida — pressione Enter ou clique em PDF / XML'
-    status.style.color='var(--ok)'
+    setStatus('✅ Chave válida — pressione Enter ou clique em PDF / XML','var(--ok)')
     inp.addEventListener('keydown',_onChaveEnter,{once:true})
   }
-  btnXml.disabled=!ok; btnXml.style.opacity=ok?'1':'0.4'; btnXml.style.cursor=ok?'pointer':'not-allowed'
-  btnPdf.disabled=!ok; btnPdf.style.opacity=ok?'1':'0.4'; btnPdf.style.cursor=ok?'pointer':'not-allowed'
+  setBtns(!ok)
+  document.getElementById('btn-dl-xml').style.cursor=ok?'pointer':'not-allowed'
+  document.getElementById('btn-dl-pdf').style.cursor=ok?'pointer':'not-allowed'
 }
 
 function _onChaveEnter(e){
@@ -872,74 +884,92 @@ function _onChaveEnter(e){
 function baixarNF(tipo){
   var chave=document.getElementById('input-chave').value.replace(/\D/g,'')
   if(chave.length!==44){alert('Chave inválida.');return}
-  var st=document.getElementById('chave-status')
-  var btnXml=document.getElementById('btn-dl-xml')
-  var btnPdf=document.getElementById('btn-dl-pdf')
-  btnXml.disabled=true;btnPdf.disabled=true
-  btnXml.style.opacity='0.5';btnPdf.style.opacity='0.5'
-  st.textContent='⏳ Abrindo consultadanfe.com...';st.style.color='var(--acc)'
+  setBtns(true)
+  setStatus('⏳ Baixando '+(tipo==='pdf'?'DANFE PDF':'XML')+' direto...','var(--acc)')
 
-  var popup=window.open('about:blank','danfe_'+Date.now(),'width=1000,height=750,scrollbars=yes,resizable=yes')
+  // ── Tenta Edge Function (download 100% direto, sem abrir nenhum site) ──
+  fetch(EDGE_URL,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+ANON_KEY,
+      'apikey':ANON_KEY
+    },
+    body:JSON.stringify({chave:chave,tipo:tipo}),
+    signal:AbortSignal.timeout(25000)
+  })
+  .then(function(res){
+    var ct=res.headers.get('content-type')||''
+    // ✅ Retornou arquivo binário diretamente
+    if(ct.includes('application/pdf')||ct.includes('application/xml')||ct.includes('octet-stream')){
+      return res.blob().then(function(blob){
+        var url=URL.createObjectURL(blob)
+        var a=document.createElement('a')
+        a.href=url; a.download=chave+'.'+(tipo==='pdf'?'pdf':'xml')
+        document.body.appendChild(a); a.click()
+        document.body.removeChild(a); URL.revokeObjectURL(url)
+        setStatus('✅ '+(tipo==='pdf'?'DANFE PDF':'XML')+' baixado com sucesso! 🎉','var(--ok)')
+        setBtns(false)
+      })
+    }
+    // Retornou JSON — verificar se é erro
+    return res.json().then(function(data){
+      if(data.erro){
+        console.warn('Edge Function retornou erro:',data)
+        setStatus('⚠ '+data.erro+' — usando fallback...','var(--warn)')
+        setTimeout(function(){_popupFallback(chave,tipo)},400)
+      } else {
+        setStatus('✅ Processado com sucesso!','var(--ok)')
+        setBtns(false)
+      }
+    })
+  })
+  .catch(function(err){
+    // Edge Function não deployada ainda — usa popup automaticamente
+    console.warn('Edge não disponível, usando popup:',err.message)
+    setStatus('⏳ Abrindo consultadanfe.com...','var(--acc)')
+    _popupFallback(chave,tipo)
+  })
+}
+
+// ── Fallback popup consultadanfe.com ─────────────────────────────
+function _popupFallback(chave,tipo){
+  setBtns(true)
+  var popup=window.open('about:blank','danfe_'+Date.now(),'width=1020,height=780,scrollbars=yes,resizable=yes')
   if(!popup||popup.closed){
-    st.textContent='⚠ Popup bloqueado — permita popups neste site e tente novamente'
-    st.style.color='var(--warn)'
-    btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'
-    return
+    setStatus('⚠ Popup bloqueado — permita popups e tente novamente','var(--warn)')
+    setBtns(false); return
   }
-
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Gerando DANFE...</title>'+
-  '<style>*{margin:0;padding:0;box-sizing:border-box}'+
-  'body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;height:100vh}'+
-  '.card{background:#fff;border-radius:16px;padding:48px 56px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:420px}'+
-  '.spin{width:48px;height:48px;border:5px solid #e2e8f0;border-top:5px solid #3b82f6;border-radius:50%;animation:s .8s linear infinite;margin:0 auto 20px}'+
-  '@keyframes s{to{transform:rotate(360deg)}}'+
-  'h2{color:#1e40af;font-size:20px;margin-bottom:8px}p{color:#64748b;font-size:14px;line-height:1.6}</style></head>'+
-  '<body><div class="card"><div class="spin"></div>'+
-  '<h2>Gerando '+(tipo==='pdf'?'DANFE PDF':'Arquivo XML')+'</h2>'+
-  '<p>Consultando os servidores fiscais...<br>'+
-  '<small style="color:#94a3b8;margin-top:8px;display:block;font-family:monospace">'+chave.substring(0,10)+'...'+chave.substring(34)+'</small></p></div>'+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Baixando DANFE...</title>'+
+  '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#1e3a8a,#2563eb);display:flex;align-items:center;justify-content:center;height:100vh}'+
+  '.card{background:#fff;border-radius:20px;padding:52px 60px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.25);max-width:440px}'+
+  '.spin{width:52px;height:52px;border:5px solid #dbeafe;border-top:5px solid #2563eb;border-radius:50%;animation:s .7s linear infinite;margin:0 auto 22px}'+
+  '@keyframes s{to{transform:rotate(360deg)}}h2{color:#1e3a8a;font-size:21px;margin-bottom:10px;font-weight:700}'+
+  'p{color:#6b7280;font-size:13px;line-height:1.7}.chave{color:#9ca3af;font-family:monospace;font-size:11px;margin-top:10px;display:block;background:#f9fafb;padding:5px 10px;border-radius:6px;border:1px solid #e5e7eb}'+
+  '</style></head><body>'+
+  '<div class="card"><div class="spin"></div>'+
+  '<h2>'+(tipo==='pdf'?'📄 Gerando DANFE':'📦 Baixando XML')+'</h2>'+
+  '<p>Consultando servidores fiscais...<br><span class="chave">'+
+  chave.substring(0,4)+' '+chave.substring(4,8)+' '+chave.substring(8,14)+' ··· '+chave.substring(38)+
+  '</span></p></div>'+
   '<form id="f" method="POST" action="https://consultadanfe.com/CDanfe/preview/use" target="_self">'+
   '<input type="hidden" name="chave" value="'+chave+'">'+
   '</form>'+
   '<script>'+
-  'setTimeout(function(){document.getElementById("f").submit()},400);'+
-  '<\/script>'+
-  '</body></html>'
-
+  'setTimeout(function(){document.getElementById("f").submit();},500);'+
+  // Auto-clica DownPDF/XML assim que a página carregar
+  'var _t=0,_iv=setInterval(function(){_t++;'+
+  'try{if(location.href.indexOf("consultadanfe")>-1){'+
+  (tipo==='pdf'
+    ? 'if(typeof DownPDF==="function"){DownPDF();clearInterval(_iv);return;}'
+    : 'if(typeof DownXML==="function"){DownXML();clearInterval(_iv);return;}')+
+  'var _b=document.querySelector(".btn-download-premium.'+(tipo==='pdf'?'pdf':'xml')+'");'+
+  'if(_b&&!_b.disabled){_b.click();clearInterval(_iv);return;}'+
+  '}}catch(e){}if(_t>40)clearInterval(_iv);},500);'+
+  '<\/script></body></html>'
   popup.document.open();popup.document.write(html);popup.document.close()
-
-  // Tenta auto-clicar o botão de download após a página do consultadanfe carregar
-  // (funciona se o navegador não bloquear acesso cross-origin ao popup)
-  var tentativas=0
-  var monitor=setInterval(function(){
-    tentativas++
-    try{
-      var doc=popup.document
-      // Verifica se a página do consultadanfe já carregou (URL mudou)
-      if(popup.location&&popup.location.href&&popup.location.href.indexOf('consultadanfe.com')>-1){
-        // Tenta chamar DownPDF diretamente
-        if(tipo==='pdf'&&typeof popup.DownPDF==='function'){
-          popup.DownPDF()
-          clearInterval(monitor)
-          return
-        }
-        // Tenta clicar o botão PDF
-        var btnPDF=doc.querySelector('.btn-download-premium.pdf')
-        if(btnPDF){
-          btnPDF.click()
-          clearInterval(monitor)
-          return
-        }
-      }
-    }catch(e){
-      // Cross-origin bloqueado — normal, usuário clica manualmente
-    }
-    if(tentativas>20) clearInterval(monitor)
-  },500)
-
-  st.textContent='✅ Janela aberta — clique em "Baixar PDF" ou "Baixar XML"'
-  st.style.color='var(--ok)'
-  setTimeout(function(){btnXml.disabled=false;btnPdf.disabled=false;btnXml.style.opacity='1';btnPdf.style.opacity='1'},2500)
+  setStatus('✅ Janela aberta — o download deve iniciar automaticamente','var(--ok)')
+  setTimeout(function(){setBtns(false)},2500)
 }
 
 function fechar(){document.getElementById('overlay').classList.remove('open')}
